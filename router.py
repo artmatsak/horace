@@ -3,10 +3,8 @@ from inspect import Signature, signature
 
 
 class Router():
-    registry = {}
-
     def __init__(self):
-        pass
+        self.registry = {}
 
     def command(self, desc: str, example_params: tuple):
         def decorator(func):
