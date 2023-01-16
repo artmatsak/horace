@@ -1,4 +1,7 @@
+from colorama import Fore, Back, Style
+import mocks.openai as openai
 from router import Router
+from openai_chatbot import OpenAIChatbot
 
 
 backend = Router()
@@ -10,10 +13,20 @@ def book_table(num_people: int, datetime: str) -> str:
 
 
 if __name__ == '__main__':
-    print(backend.registry)
+    openai.api_key = ""
 
-    try:
-        command_json = '{"command": "book_table", "params": {"num_people": 2, "datetime": "2023-03-04 6:00 pm"}}'
-        print(backend.invoke(command_json))
-    except Exception as e:
-        print(e)
+    initial_prompt = "Some prompt"
+    first_utterance = "Hello there! How can I help you?"
+
+    chatbot = OpenAIChatbot(openai=openai,
+                            initial_prompt=initial_prompt,
+                            first_utterance=first_utterance)
+
+    utterance = chatbot.start_session()
+
+    while not chatbot.session_ended():
+        print(Fore.BLUE + utterance + Style.RESET_ALL)
+        response = input(Fore.MAGENTA + "Your input -> " + Fore.YELLOW)
+        utterance = chatbot.send_response(response)
+
+    print(Fore.BLUE + utterance + Style.RESET_ALL)
