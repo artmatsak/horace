@@ -1,3 +1,4 @@
+import logging
 from typing import Tuple
 
 
@@ -28,6 +29,8 @@ class OpenAIChatbot():
     def send_response(self, response: str) -> str:
         self.prompt += f"\n{self.names[1]}: {response.strip()}\n{self.names[0]}:"
 
+        logging.debug(
+            f"Requesting OpenAI completion for prompt:\n{self.prompt}")
         completion = self.openai.Completion.create(
             engine=self.openai_engine,
             prompt=self.prompt,
@@ -36,6 +39,7 @@ class OpenAIChatbot():
         )
 
         utterance = completion.choices[0]["text"].strip()
+        logging.debug(f"Got utterance: {repr(utterance)}")
 
         end_token_pos = utterance.find(self.end_token)
         if end_token_pos != -1:

@@ -1,3 +1,4 @@
+import logging
 from colorama import Fore, Back, Style
 import mocks.openai as openai
 from router import Router
@@ -13,6 +14,10 @@ def book_table(num_people: int, datetime: str) -> str:
 
 
 if __name__ == '__main__':
+    logging.basicConfig(filename='sessions.log',
+                        format='[%(asctime)s] %(levelname)s: %(message)s',
+                        encoding='utf-8', level=logging.DEBUG)
+
     openai.api_key = ""
 
     initial_prompt = "Some prompt"
