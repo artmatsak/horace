@@ -45,8 +45,9 @@ class OpenAIChatbot():
         completion = self.openai.Completion.create(
             engine=self.openai_engine,
             prompt=self.prompt,
+            max_tokens=150,
             stop=self.stop,
-            temperature=0.7
+            temperature=0.9
         )
 
         utterance = completion.choices[0]["text"].strip()
