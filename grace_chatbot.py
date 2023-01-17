@@ -56,6 +56,7 @@ A transcript of a chat session with a customer follows."""
                          names=self.NAMES,
                          openai_engine=openai_engine)
 
+        self.stop.append(f"{self.BACKEND_NAME}:")
         self.backend = backend
         self.domain = domain
 
