@@ -1,10 +1,14 @@
+import os
 import logging
 from colorama import Fore, Style
-import mocks.openai as openai
+# import mocks.openai as openai
+import openai
 from router import Router
 from grace_chatbot import GRACEChatbot
+from dotenv import load_dotenv
 from typing import List
 
+load_dotenv()
 
 backend = Router()
 
@@ -29,7 +33,7 @@ if __name__ == '__main__':
                         format='[%(asctime)s] %(levelname)s: %(message)s',
                         encoding='utf-8', level=logging.DEBUG)
 
-    openai.api_key = ""
+    openai.api_key = os.environ["OPENAI_API_KEY"]
 
     chatbot = GRACEChatbot(openai=openai, backend=backend, domain=domain)
 
