@@ -7,14 +7,12 @@ class OpenAIChatbot():
         self,
         openai,
         initial_prompt: str,
-        first_utterance: str,
         names: Tuple[str, str] = ("AI", "Human"),
         end_token: str = "END",
         openai_engine: str = "text-davinci-003"
     ):
         self.openai = openai
         self.initial_prompt = initial_prompt
-        self.first_utterance = first_utterance
         self.names = names
         self.end_token = end_token
         self.openai_engine = openai_engine
@@ -22,12 +20,25 @@ class OpenAIChatbot():
         self.prompt = ""
         self.stop = [f"{name}:" for name in names]
 
-    def start_session(self) -> str:
-        self.prompt = f"{self.initial_prompt}\n\n{self.names[0]}: {self.first_utterance}"
-        return self.first_utterance
+    def start_session(self):
+        self.prompt = f"{self.initial_prompt}\n"
+        return self._get_all_utterances()
 
-    def send_response(self, response: str) -> str:
-        self.prompt += f"\n{self.names[1]}: {response.strip()}\n{self.names[0]}:"
+    def send_response(self, response: str):
+        self._add_response(self.names[1], response.strip())
+        return self._get_all_utterances()
+
+    def session_ended(self) -> bool:
+        return not self.prompt
+
+    def _add_response(self, name: str, response: str):
+        self.prompt += f"\n{name}: {response}"
+
+    def _get_all_utterances(self):
+        return [self._get_next_utterance()]
+
+    def _get_next_utterance(self):
+        self.prompt += f"\n{self.names[0]}:"
 
         logging.debug(
             f"Requesting OpenAI completion for prompt:\n{self.prompt}")
@@ -50,6 +61,3 @@ class OpenAIChatbot():
             self.prompt = f"{self.prompt} {utterance}"
 
         return utterance
-
-    def session_ended(self) -> bool:
-        return not self.prompt

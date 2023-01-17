@@ -2,15 +2,26 @@ import logging
 from colorama import Fore, Style
 import mocks.openai as openai
 from router import Router
-from openai_chatbot import OpenAIChatbot
+from grace_chatbot import GRACEChatbot
+from typing import List
 
 
 backend = Router()
 
+domain = {
+    "business_name": "Death Star, a Star Wars-themed restaurant in Cupertino, CA",
+    "extra_instructions": "In your speech, you impersonate Jedi Master Yoda."
+}
 
-@backend.command(desc="book a table", example_params=(2, "2023-03-04 6:00 pm"))
-def book_table(num_people: int, datetime: str) -> str:
+
+@backend.command(desc="book a table", example_params=("Jose James", 2, "2023-03-04 6:00 pm"))
+def book_table(name: str, num_people: int, datetime: str) -> str:
     return "Booking successful, reference: YEHBZL"
+
+
+def print_utterances(utterances: List[str]):
+    for utterance in utterances:
+        print(Fore.BLUE + utterance + Style.RESET_ALL)
 
 
 if __name__ == '__main__':
@@ -20,18 +31,13 @@ if __name__ == '__main__':
 
     openai.api_key = ""
 
-    initial_prompt = "Some prompt"
-    first_utterance = "Hello there! How can I help you?"
+    chatbot = GRACEChatbot(openai=openai, backend=backend, domain=domain)
 
-    chatbot = OpenAIChatbot(openai=openai,
-                            initial_prompt=initial_prompt,
-                            first_utterance=first_utterance)
-
-    utterance = chatbot.start_session()
+    utterances = chatbot.start_session()
 
     while not chatbot.session_ended():
-        print(Fore.BLUE + utterance + Style.RESET_ALL)
+        print_utterances(utterances)
         response = input(Fore.MAGENTA + "Your input -> " + Fore.YELLOW)
-        utterance = chatbot.send_response(response)
+        utterances = chatbot.send_response(response)
 
-    print(Fore.BLUE + utterance + Style.RESET_ALL)
+    print_utterances(utterances)
