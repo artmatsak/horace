@@ -26,7 +26,7 @@ class Router():
 
         return decorator
 
-    def invoke(self, command_json: str):
+    def invoke(self, command_json: str) -> str:
         try:
             command_dict = json.loads(command_json)
         except json.decoder.JSONDecodeError:
