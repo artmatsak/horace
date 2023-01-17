@@ -1,5 +1,5 @@
 import logging
-from colorama import Fore, Back, Style
+from colorama import Fore, Style
 import mocks.openai as openai
 from router import Router
 from openai_chatbot import OpenAIChatbot
