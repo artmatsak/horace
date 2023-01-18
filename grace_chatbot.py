@@ -12,7 +12,7 @@ class GRACEChatbot(OpenAIChatbot):
 2. Identify the customer's request.
 3. Gather all the information necessary to process the request.
 4. Summarize all of the information for the customer and ask them to confirm it.
-5. Ask the customer to hold on and then process the request by sending a command JSON to the backend.
+5. Ask the customer to hold on and then process the request by sending a command JSON to the backend as follows: (To Backend) [json]{{command JSON}}[/json]
 6. Confirm the result back to the customer and ask if there's anything else you can do for them.
 7. If there's nothing else, say goodbye and output the special "END" token.
 
