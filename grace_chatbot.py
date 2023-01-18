@@ -29,7 +29,7 @@ AI: I have now canceled your booking. Is there anything else I can do for you?
 Customer: That's it, thanks!
 AI: No problem, have a nice day! END
 
-Only the following Python commands are available to you. You must get all command parameters from the customer. A parameter cannot be empty. If the customer's request is not among the provided commands, you refuse to process it:
+Only the following Python commands are available to you. You must get all command parameters from the customer. If the customer's request is not among the provided commands, you refuse to process it:
 
 {}
 
