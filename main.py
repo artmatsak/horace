@@ -33,6 +33,10 @@ if __name__ == '__main__':
                         format='[%(asctime)s] %(levelname)s: %(message)s',
                         encoding='utf-8', level=logging.DEBUG)
 
+    # Increase log level for OpenAI API
+    openai_logger = logging.getLogger("openai")
+    openai_logger.setLevel(logging.ERROR)
+
     openai.api_key = os.environ["OPENAI_API_KEY"]
 
     chatbot = GRACEChatbot(openai=openai, backend=backend, domain=domain)
