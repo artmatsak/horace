@@ -18,8 +18,8 @@ domain = {
 }
 
 
-@backend.command(desc="book a table", example_params=("Jose James", 2, "2023-03-04 6:00 pm"))
-def create_booking(name: str, num_people: int, datetime: str) -> str:
+@backend.command(desc="book a table", example_params=("Jose James", 2, "2023-03-04", "6:00 pm"))
+def create_booking(name: str, num_people: int, date: str, time: str) -> str:
     return "Booking successful, reference: YEHBZL"
 
 
