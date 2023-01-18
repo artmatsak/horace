@@ -19,8 +19,13 @@ domain = {
 
 
 @backend.command(desc="book a table", example_params=("Jose James", 2, "2023-03-04 6:00 pm"))
-def book_table(name: str, num_people: int, datetime: str) -> str:
+def create_booking(name: str, num_people: int, datetime: str) -> str:
     return "Booking successful, reference: YEHBZL"
+
+
+@backend.command(desc="cancel a booking", example_params=("HTLYNN"))
+def delete_booking(reference: str) -> str:
+    return "Booking canceled"
 
 
 def print_utterances(utterances: List[str]):

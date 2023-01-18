@@ -18,18 +18,18 @@ class GRACEChatbot(OpenAIChatbot):
 
 A typical interaction proceeds similar to the following:
 
-Customer: I'd like to cancel my cab ride.
-AI: Sure. Can you give me the name on the ride please?
-Customer: It's Alice Johnson.
-AI: I understand that you'd like to cancel a cab ride for Alice Johnson, is that correct?
+Customer: I'd like to cancel my table reservation.
+AI: Sure. Can you give me the booking reference please?
+Customer: It's GLEYHL.
+AI: I understand that you'd like to cancel your reservation GLEYHL, is that correct?
 Customer: Yes.
-AI: All right, let me look into this for you. (To Backend) [json]{{"command": "cancel_ride", "params": {{"name": "Alice Johnson"}}}}[/json]
-Backend: (To AI) Ride canceled
-AI: I have now canceled your ride. Is there anything else I can do for you?
+AI: All right, let me look into this for you. (To Backend) [json]{{"command": "delete_booking", "params": {{"reference": "GLEYHL"}}}}[/json]
+Backend: (To AI) Booking canceled
+AI: I have now canceled your booking. Is there anything else I can do for you?
 Customer: That's it, thanks!
 AI: No problem, have a nice day! END
 
-Only the following Python commands are available to you:
+Only the following Python commands are available to you. If the customer's request is not among them, you refuse to process it:
 
 {}
 
