@@ -17,7 +17,7 @@ class OpenAIChatbot():
         self.end_token = end_token
         self.openai_engine = openai_engine
 
-        self.prompt = ""
+        self.prompt = None
         self.stop = [f"{name}:" for name in names]
 
     def start_session(self):
@@ -25,11 +25,14 @@ class OpenAIChatbot():
         return self._get_all_utterances()
 
     def send_response(self, response: str):
+        if self.prompt is None:
+            raise RuntimeError("Chatbot session is not active")
+
         self._add_response(self.names[1], response.strip())
         return self._get_all_utterances()
 
     def session_ended(self) -> bool:
-        return not self.prompt
+        return self.prompt is None
 
     def _add_response(self, name: str, response: str):
         self.prompt += f"\n{name}: {response}"
@@ -57,7 +60,7 @@ class OpenAIChatbot():
         if end_token_pos != -1:
             utterance = utterance[:end_token_pos].strip()
             # Ending the session
-            self.prompt = ""
+            self.prompt = None
         else:
             self.prompt = f"{self.prompt} {utterance}"
 
