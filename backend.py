@@ -12,7 +12,7 @@ domain = {
 }
 
 
-@backend.command(desc="check table availability", example_params=(5, "tomorrow", "10:15 am"))
+@backend.command(desc="check if table is available for booking", example_params=(5, "tomorrow", "10:15 am"))
 def check_table_availability(num_people: int, date: str, time: str) -> str:
     num_people, time = _validate_table_params(num_people, date, time)
     return "The table is available"
