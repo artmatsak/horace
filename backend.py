@@ -30,7 +30,12 @@ def book_table(name: str, num_people: int, date: str, time: str) -> str:
     return "Booking confirmed, reference: YEHBZL"
 
 
-@backend.command(desc="cancel a booking", example_params=("HTLYNN"))
+@backend.command(desc="get booking details", example_params=("YBNAPP",))
+def get_booking_details(reference: str) -> str:
+    return "Found booking for May Longhorn, 4 people at 8:30 pm on August 3, 2023"
+
+
+@backend.command(desc="cancel a booking", example_params=("HTLYNN",))
 def cancel_booking(reference: str) -> str:
     return "Booking canceled"
 
