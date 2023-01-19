@@ -6,7 +6,6 @@ import openai
 from backend import backend, domain
 from grace_chatbot import GRACEChatbot
 from dotenv import load_dotenv
-from typing import List
 
 load_dotenv()
 
