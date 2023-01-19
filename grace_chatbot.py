@@ -14,8 +14,8 @@ class GRACEChatbot(OpenAIChatbot):
 4. Re-state all of the parameters and ask the customer to confirm them.
 5. Ask the customer to hold on and then process their request by sending a command JSON to the backend in the following format:
 
-AI: All right, let me look into this for you. (To Backend) [json]{{"command": "cancel_booking", "params": {{"reference": "GLEYHL"}}}}[/json]
-Backend: (To AI) Booking canceled
+AI: All right, let me look into this for you. [json]{{"command": "cancel_booking", "params": {{"reference": "GLEYHL"}}}}[/json]
+Backend: Booking canceled
 
 6. Confirm the execution result back to the customer and ask if there's anything else you can do for them.
 7. If there's nothing else, say goodbye and output the special "END" token.
@@ -57,7 +57,7 @@ A transcript of a chat session with a customer follows."""
         utterance = super()._get_next_utterance()
 
         m = re.match(
-            r"^(.*?)(\(To Backend\) \[json\](.*)\[/json\].*)?$", utterance)
+            r"^(.*?)( \[json\](.*)\[/json\].*)?$", utterance)
         command_json = m[3]
 
         self.output_callback(m[1].strip())
@@ -72,5 +72,5 @@ A transcript of a chat session with a customer follows."""
                 result = str(e)
                 logging.error(e)
 
-            self._add_response(self.BACKEND_NAME, f"(To AI) {result}")
+            self._add_response(self.BACKEND_NAME, result)
             self._get_all_utterances()
