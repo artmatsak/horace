@@ -27,7 +27,7 @@ def book_table(name: str, num_people: int, date: str, time: str) -> str:
 
     num_people, time = _validate_table_params(num_people, date, time)
 
-    return f"Booking confirmed, reference: YEHBZL"
+    return "Booking confirmed, reference: YEHBZL"
 
 
 @backend.command(desc="cancel a booking", example_params=("HTLYNN"))
