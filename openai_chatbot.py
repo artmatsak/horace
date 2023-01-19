@@ -1,5 +1,5 @@
 import logging
-from typing import Tuple
+from typing import Tuple, Callable
 
 
 class OpenAIChatbot():
@@ -7,12 +7,14 @@ class OpenAIChatbot():
         self,
         openai,
         initial_prompt: str,
+        output_callback: Callable[[str], None],
         names: Tuple[str, str] = ("AI", "Human"),
         end_token: str = "END",
         openai_engine: str = "text-davinci-003"
     ):
         self.openai = openai
         self.initial_prompt = initial_prompt
+        self.output_callback = output_callback
         self.names = names
         self.end_token = end_token
         self.openai_engine = openai_engine
@@ -22,14 +24,14 @@ class OpenAIChatbot():
 
     def start_session(self):
         self.prompt = f"{self.initial_prompt}\n"
-        return self._get_all_utterances()
+        self._get_all_utterances()
 
     def send_response(self, response: str):
         if self.prompt is None:
             raise RuntimeError("Chatbot session is not active")
 
         self._add_response(self.names[1], response.strip())
-        return self._get_all_utterances()
+        self._get_all_utterances()
 
     def session_ended(self) -> bool:
         return self.prompt is None
@@ -38,7 +40,7 @@ class OpenAIChatbot():
         self.prompt += f"\n{name}: {response}"
 
     def _get_all_utterances(self):
-        return [self._get_next_utterance()]
+        self.output_callback(self._get_next_utterance())
 
     def _get_next_utterance(self):
         self.prompt += f"\n{self.names[0]}:"

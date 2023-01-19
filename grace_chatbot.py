@@ -2,7 +2,7 @@ import re
 import logging
 from openai_chatbot import OpenAIChatbot
 from router import Router
-from typing import Dict
+from typing import Dict, Callable
 
 
 class GRACEChatbot(OpenAIChatbot):
@@ -35,6 +35,7 @@ A transcript of a chat session with a customer follows."""
         openai,
         backend: Router,
         domain: Dict[str, str],
+        output_callback: Callable[[str], None],
         openai_engine: str = "text-davinci-003"
     ):
         commands_string = "\n".join([f'- {c["python_sig"]} - {c["desc"]}. Example JSON: {c["example_json"]}'
@@ -44,6 +45,7 @@ A transcript of a chat session with a customer follows."""
                                                              domain["extra_instructions"])
         super().__init__(openai=openai,
                          initial_prompt=initial_prompt,
+                         output_callback=output_callback,
                          names=self.NAMES,
                          openai_engine=openai_engine)
 
@@ -56,8 +58,9 @@ A transcript of a chat session with a customer follows."""
 
         m = re.match(
             r"^(.*?)(\(To Backend\) \[json\](.*)\[/json\].*)?$", utterance)
-        utterances = [m[1].strip()]
         command_json = m[3]
+
+        self.output_callback(m[1].strip())
 
         if command_json:
             logging.debug(f"Invoking backend command: {repr(command_json)}")
@@ -70,6 +73,4 @@ A transcript of a chat session with a customer follows."""
                 logging.error(e)
 
             self._add_response(self.BACKEND_NAME, f"(To AI) {result}")
-            utterances += self._get_all_utterances()
-
-        return utterances
+            self._get_all_utterances()

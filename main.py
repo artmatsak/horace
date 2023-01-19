@@ -11,9 +11,8 @@ from typing import List
 load_dotenv()
 
 
-def print_utterances(utterances: List[str]):
-    for utterance in utterances:
-        print(Fore.BLUE + utterance + Style.RESET_ALL)
+def print_utterance(utterance: str):
+    print(Fore.BLUE + utterance + Style.RESET_ALL)
 
 
 if __name__ == '__main__':
@@ -27,13 +26,11 @@ if __name__ == '__main__':
 
     openai.api_key = os.environ["OPENAI_API_KEY"]
 
-    chatbot = GRACEChatbot(openai=openai, backend=backend, domain=domain)
+    chatbot = GRACEChatbot(openai=openai, backend=backend,
+                           domain=domain, output_callback=print_utterance)
 
-    utterances = chatbot.start_session()
+    chatbot.start_session()
 
     while not chatbot.session_ended():
-        print_utterances(utterances)
         response = input(Fore.MAGENTA + "Your input -> " + Fore.YELLOW)
-        utterances = chatbot.send_response(response)
-
-    print_utterances(utterances)
+        chatbot.send_response(response)
