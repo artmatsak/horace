@@ -14,7 +14,7 @@ class GRACEChatbot(OpenAIChatbot):
 4. Re-state all of the parameters and ask the customer to confirm them.
 5. Ask the customer to hold on and then process their request by sending a command JSON to the backend in the following format:
 
-AI: All right, let me look into this for you. (To Backend) [json]{{"command": "delete_booking", "params": {{"reference": "GLEYHL"}}}}[/json]
+AI: All right, let me look into this for you. (To Backend) [json]{{"command": "cancel_booking", "params": {{"reference": "GLEYHL"}}}}[/json]
 Backend: (To AI) Booking canceled
 
 6. Confirm the execution result back to the customer and ask if there's anything else you can do for them.
