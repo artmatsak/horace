@@ -56,7 +56,7 @@ A transcript of a chat session with a customer follows."""
         utterance = super()._get_next_utterance()
 
         m = re.match(
-            r"^(.*?)( \[json\](.*)\[/json\].*)?$", utterance)
+            r"^(.*?)( \[json\](.*?)\[/json\].*)?$", utterance)
         command_json = m[3]
 
         self.output_callback(m[1].strip())
