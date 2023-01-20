@@ -1,3 +1,4 @@
+import string
 import logging
 from typing import Tuple, Callable
 
@@ -62,7 +63,8 @@ class OpenAIChatbot():
             temperature=0.9
         )
 
-        utterance = completion.choices[0]["text"].strip()
+        utterance = completion.choices[0]["text"].strip(
+            string.whitespace + '"')
         logging.debug(f"Got utterance: {repr(utterance)}")
 
         end_token_pos = utterance.find(self.end_token)
