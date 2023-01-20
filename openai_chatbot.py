@@ -24,6 +24,7 @@ class OpenAIChatbot():
 
     def start_session(self):
         self.prompt = f"{self.initial_prompt}\n"
+        logging.debug(f"Starting chatbot session with prompt:\n{self.prompt}")
         self._get_all_utterances()
 
     def send_response(self, response: str):
@@ -37,6 +38,8 @@ class OpenAIChatbot():
         return self.prompt is None
 
     def _add_response(self, name: str, response: str):
+        log_response = f"{name}: {response}"
+        logging.debug(f"Adding response: {repr(log_response)}")
         self.prompt += f"\n{name}: {response}"
 
     def _get_all_utterances(self):
@@ -51,8 +54,6 @@ class OpenAIChatbot():
     def _get_next_utterance(self) -> str:
         self.prompt += f"\n{self.names[0]}:"
 
-        logging.debug(
-            f"Requesting OpenAI completion for prompt:\n{self.prompt}")
         completion = self.openai.Completion.create(
             engine=self.openai_engine,
             prompt=self.prompt,
