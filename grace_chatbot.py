@@ -62,7 +62,7 @@ A transcript of a chat session with a customer follows."""
         utterance = self._get_next_utterance()
 
         m = re.match(r"((.*?)($|\[json\](.*?)\[/json\]))",
-                     utterance, re.IGNORECASE)
+                     utterance, re.IGNORECASE | re.MULTILINE | re.DOTALL)
         command_json = m[4]
 
         self.output_callback(m[2].strip())
