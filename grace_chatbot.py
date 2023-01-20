@@ -23,6 +23,8 @@ Only the following Python commands are available to you. If the customer's reque
 
 {}
 
+You don't know anything about the business except the information provided here. If a customer asks you a question the answer to which you don't know, you look the question up with the look_up command.
+
 You use all dates exactly as provided by the customer, without rephrasing or converting them. {}
 
 A transcript of a chat session with a customer follows."""
@@ -37,6 +39,10 @@ A transcript of a chat session with a customer follows."""
         output_callback: Callable[[str], None],
         openai_engine: str = "text-davinci-003"
     ):
+        @backend.command(desc="look up a question", example_params=("opening hours",))
+        def look_up(query: str) -> str:
+            return self._look_up(query)
+
         commands_string = "\n".join([f'- {c["python_sig"]} - {c["desc"]}. Example JSON: {c["example_json"]}'
                                      for c in backend.registry.values()])
         initial_prompt = self.INITIAL_PROMPT_TEMPLATE.format(domain["business_name"],
@@ -77,3 +83,6 @@ A transcript of a chat session with a customer follows."""
             if self.prompt is not None:
                 self._add_response(self.BACKEND_NAME, result)
                 self._get_all_utterances()
+
+    def _look_up(slef, query: str) -> str:
+        return "The restaurant's opening hours are 10 AM to 10 PM Monday through Sunday"
