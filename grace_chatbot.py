@@ -63,9 +63,11 @@ A transcript of a chat session with a customer follows."""
 
         m = re.match(r"((.*?)($|\[json\](.*?)\[/json\]))",
                      utterance, re.IGNORECASE | re.MULTILINE | re.DOTALL)
+        utterance = m[2].strip()
         command_json = m[4]
 
-        self.output_callback(m[2].strip())
+        if utterance:
+            self.output_callback(utterance)
 
         if self.prompt is not None:
             self.prompt = f"{self.prompt} {m[1]}"

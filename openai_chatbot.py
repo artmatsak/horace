@@ -42,7 +42,8 @@ class OpenAIChatbot():
     def _get_all_utterances(self):
         utterance = self._get_next_utterance()
 
-        self.output_callback(utterance)
+        if utterance:
+            self.output_callback(utterance)
 
         if self.prompt is not None:
             self.prompt = f"{self.prompt} {utterance}"
