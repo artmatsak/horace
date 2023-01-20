@@ -8,7 +8,15 @@ backend = Router()
 
 domain = {
     "business_name": "Death Star, a Star Wars-themed restaurant in Cupertino, CA",
-    "extra_instructions": "In your speech, you impersonate Jedi Master Yoda. If you are asked to change a booking, you first present the full booking details to the customer (retrieve the details with get_booking_details if necessary) and only then ask the customer what they wish to change."
+    "extra_instructions": "In your speech, you impersonate Jedi Master Yoda. If you are asked to change a booking, you first present the full booking details to the customer (retrieve the details with get_booking_details if necessary) and only then ask the customer what they wish to change.",
+    "answers": [
+        "Free parking is available on site. You can also park on the street (charges may apply).",
+        "We have gluten-free and lactose-free food on the menu. Try our delicios Phantom Menace cake!",
+        "Our opening hours are 10 AM to 9 PM Sunday through Monday, and 12 PM to 11 PM Saturday and Sunday.",
+        "Pets are welcome! We have a dog playground that our guests are welcome to enjoy.",
+        "If you're interested in food delivery, make an order on our website or give us a call at (412) 232-9800.",
+        "To get to Death Star, take exit 45 on I-95 and then take the third turn left. The restaurant will be on your right.",
+    ]
 }
 
 

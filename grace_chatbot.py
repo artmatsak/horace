@@ -1,8 +1,10 @@
 import re
 import logging
+import torch
+from sentence_transformers import SentenceTransformer, util
 from openai_chatbot import OpenAIChatbot
 from router import Router
-from typing import Dict, Callable
+from typing import Dict, List, Callable
 
 
 class GRACEChatbot(OpenAIChatbot):
@@ -58,6 +60,13 @@ A transcript of a chat session with a customer follows."""
         self.backend = backend
         self.domain = domain
 
+        logging.debug("Loading the sentence embedding model")
+        self.embedding_model = SentenceTransformer("multi-qa-MiniLM-L6-cos-v1")
+
+        logging.debug("Embedding the domain answers")
+        self.answer_embeddings = self.embedding_model.encode(
+            self.domain["answers"], show_progress_bar=False)
+
     def _get_all_utterances(self):
         utterance = self._get_next_utterance()
 
@@ -86,5 +95,15 @@ A transcript of a chat session with a customer follows."""
                 self._add_response(self.BACKEND_NAME, result)
                 self._get_all_utterances()
 
-    def _look_up(slef, query: str) -> str:
-        return "The restaurant's opening hours are 10 AM to 10 PM Monday through Sunday"
+    def _look_up(self, query: str) -> str:
+        query_embedding = self.embedding_model.encode(
+            query, show_progress_bar=False)
+
+        cos_scores = util.dot_score(query_embedding, self.answer_embeddings)
+        top_results = torch.topk(cos_scores, k=1)
+        top_score, top_idx = top_results[0][0], top_results[1][0]
+
+        if top_score > 0.4:
+            return self.domain["answers"][top_idx]
+        else:
+            return "Cannot answer the question"
