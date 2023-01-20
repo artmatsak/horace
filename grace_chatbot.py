@@ -25,7 +25,11 @@ Only the following Python commands are available to you. If the customer's reque
 
 {}
 
-You don't know anything about the business except the information provided here. If a customer asks you a question the answer to which you don't know, you look the question up with the look_up command.
+You don't know anything about the business except the information provided here. If you don't know the answer to a customer's question, you get the answer with the look_up command. For example:
+
+Customer: Do you have parking on site?
+AI: Sure, let me quickly check this for you. [json]{{"command": "look_up", "params": {{"question": "Do you have parking on site?"}}}}[/json]
+Backend: On-site parking is available
 
 You use all dates exactly as provided by the customer, without rephrasing or converting them. {}
 
@@ -41,9 +45,9 @@ A transcript of a chat session with a customer follows."""
         output_callback: Callable[[str], None],
         openai_engine: str = "text-davinci-003"
     ):
-        @backend.command(desc="look up a question", example_params=("opening hours",))
-        def look_up(query: str) -> str:
-            return self._look_up(query)
+        @backend.command(desc="look up a question", example_params=("What are your opening hours?",))
+        def look_up(question: str) -> str:
+            return self._look_up(question)
 
         commands_string = "\n".join([f'- {c["python_sig"]} - {c["desc"]}. Example JSON: {c["example_json"]}'
                                      for c in backend.registry.values()])
@@ -95,14 +99,15 @@ A transcript of a chat session with a customer follows."""
                 self._add_response(self.BACKEND_NAME, result)
                 self._get_all_utterances()
 
-    def _look_up(self, query: str) -> str:
-        query_embedding = self.embedding_model.encode(
-            query, show_progress_bar=False)
+    def _look_up(self, question: str) -> str:
+        question_embedding = self.embedding_model.encode(
+            question, show_progress_bar=False)
 
-        cos_scores = util.dot_score(query_embedding, self.answer_embeddings)
+        cos_scores = util.dot_score(question_embedding, self.answer_embeddings)
         top_results = torch.topk(cos_scores, k=1)
         top_score, top_idx = top_results[0][0], top_results[1][0]
 
+        logging.debug(f"Lookup top score: {top_score}")
         if top_score > 0.4:
             return self.domain["answers"][top_idx]
         else:
