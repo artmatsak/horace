@@ -40,9 +40,14 @@ class OpenAIChatbot():
         self.prompt += f"\n{name}: {response}"
 
     def _get_all_utterances(self):
-        self.output_callback(self._get_next_utterance())
+        utterance = self._get_next_utterance()
 
-    def _get_next_utterance(self):
+        self.output_callback(utterance)
+
+        if self.prompt is not None:
+            self.prompt = f"{self.prompt} {utterance}"
+
+    def _get_next_utterance(self) -> str:
         self.prompt += f"\n{self.names[0]}:"
 
         logging.debug(
@@ -63,7 +68,5 @@ class OpenAIChatbot():
             utterance = utterance[:end_token_pos].strip()
             # Ending the session
             self.prompt = None
-        else:
-            self.prompt = f"{self.prompt} {utterance}"
 
         return utterance

@@ -53,13 +53,16 @@ A transcript of a chat session with a customer follows."""
         self.domain = domain
 
     def _get_all_utterances(self):
-        utterance = super()._get_next_utterance()
+        utterance = self._get_next_utterance()
 
-        m = re.match(
-            r"^(.*?)( \[json\](.*?)\[/json\].*)?$", utterance, re.IGNORECASE)
-        command_json = m[3]
+        m = re.match(r"((.*?)($|\[json\](.*?)\[/json\]))",
+                     utterance, re.IGNORECASE)
+        command_json = m[4]
 
-        self.output_callback(m[1].strip())
+        self.output_callback(m[2].strip())
+
+        if self.prompt is not None:
+            self.prompt = f"{self.prompt} {m[1]}"
 
         if command_json:
             logging.debug(f"Invoking backend command: {repr(command_json)}")
@@ -71,5 +74,6 @@ A transcript of a chat session with a customer follows."""
                 result = str(e)
                 logging.error(e)
 
-            self._add_response(self.BACKEND_NAME, result)
-            self._get_all_utterances()
+            if self.prompt is not None:
+                self._add_response(self.BACKEND_NAME, result)
+                self._get_all_utterances()
