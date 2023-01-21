@@ -52,7 +52,7 @@ A transcript of a chat session with a customer follows."""
             logging.debug(f"Knowledge base lookup score: {score}")
             return answer if score > 0.4 else "Cannot answer the question"
 
-        commands_string = "\n".join([f'- {c["python_sig"]} - {c["desc"]}. Example JSON: {c["example_json"]}'
+        commands_string = "\n".join([f'- {c["python_sig"]} - {c["desc"]}. Example JSON: [json]{c["example_json"]}[/json]'
                                      for c in backend.registry.values()])
         initial_prompt = self.INITIAL_PROMPT_TEMPLATE.format(domain["business_name"],
                                                              commands_string,
