@@ -23,4 +23,4 @@ class KnowledgeBase():
         top_results = torch.topk(cos_scores, k=1)
         top_score, top_idx = top_results[0][0], top_results[1][0]
 
-        return self.answers[top_idx], top_score.float()
+        return self.answers[top_idx], top_score.item()
