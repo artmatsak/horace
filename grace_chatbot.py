@@ -1,10 +1,9 @@
 import re
 import logging
-import torch
-from sentence_transformers import SentenceTransformer, util
 from openai_chatbot import OpenAIChatbot
 from router import Router
-from typing import Dict, List, Callable
+from knowledge_base import KnowledgeBase
+from typing import Dict, Callable
 
 
 class GRACEChatbot(OpenAIChatbot):
@@ -45,9 +44,13 @@ A transcript of a chat session with a customer follows."""
         output_callback: Callable[[str], None],
         openai_engine: str = "text-davinci-003"
     ):
+        self.knowledge_base = KnowledgeBase(domain["answers"])
+
         @backend.command(desc="look up a question", example_params=("What are your opening hours?",))
         def look_up(question: str) -> str:
-            return self._look_up(question)
+            answer, score = self.knowledge_base.look_up(question)
+            logging.debug(f"Knowledge base lookup score: {score}")
+            return answer if score > 0.4 else "Cannot answer the question"
 
         commands_string = "\n".join([f'- {c["python_sig"]} - {c["desc"]}. Example JSON: {c["example_json"]}'
                                      for c in backend.registry.values()])
@@ -63,13 +66,6 @@ A transcript of a chat session with a customer follows."""
         self.stop.append(f"{self.BACKEND_NAME}:")
         self.backend = backend
         self.domain = domain
-
-        logging.debug("Loading the sentence embedding model")
-        self.embedding_model = SentenceTransformer("multi-qa-MiniLM-L6-cos-v1")
-
-        logging.debug("Embedding the domain answers")
-        self.answer_embeddings = self.embedding_model.encode(
-            self.domain["answers"], show_progress_bar=False)
 
     def _get_all_utterances(self):
         utterance = self._get_next_utterance()
@@ -98,17 +94,3 @@ A transcript of a chat session with a customer follows."""
             if self.prompt is not None:
                 self._add_response(self.BACKEND_NAME, result)
                 self._get_all_utterances()
-
-    def _look_up(self, question: str) -> str:
-        question_embedding = self.embedding_model.encode(
-            question, show_progress_bar=False)
-
-        cos_scores = util.dot_score(question_embedding, self.answer_embeddings)
-        top_results = torch.topk(cos_scores, k=1)
-        top_score, top_idx = top_results[0][0], top_results[1][0]
-
-        logging.debug(f"Lookup top score: {top_score}")
-        if top_score > 0.4:
-            return self.domain["answers"][top_idx]
-        else:
-            return "Cannot answer the question"
