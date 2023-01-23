@@ -3,4 +3,5 @@ openai==0.26.1
 parsedatetime==2.6
 python-dateutil==2.8.2
 python-dotenv==0.21.0
+pyYAML==6.0
 sentence-transformers==2.2.2

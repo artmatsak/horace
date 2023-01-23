@@ -1,9 +1,10 @@
 import os
+import yaml
 import logging
 from colorama import Fore, Style
 # import mocks.openai as openai
 import openai
-from backend import backend, domain
+from backend import backend
 from grace_chatbot import GRACEChatbot
 from dotenv import load_dotenv
 
@@ -24,6 +25,9 @@ if __name__ == '__main__':
     openai_logger.setLevel(logging.ERROR)
 
     openai.api_key = os.environ["OPENAI_API_KEY"]
+
+    with open("domain.yaml", "r") as stream:
+        domain = yaml.safe_load(stream)
 
     chatbot = GRACEChatbot(openai=openai, backend=backend,
                            domain=domain, output_callback=print_utterance)

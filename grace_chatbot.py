@@ -7,7 +7,7 @@ from typing import Dict, Callable
 
 
 class GRACEChatbot(OpenAIChatbot):
-    INITIAL_PROMPT_TEMPLATE = """You are an AI assistant for {}. You process customers' requests as follows:
+    INITIAL_PROMPT_TEMPLATE = """You are an AI assistant for {business_name}, {business_description}. You process customers' requests as follows:
 
 1. Greet the customer and ask how you can be of help.
 2. Identify the customer's request and the backend command to process it.
@@ -22,7 +22,7 @@ Backend: Booking canceled
 
 Only the following Python commands are available to you. If the customer's request is not among the provided commands, you refuse to process it:
 
-{}
+{commands_string}
 
 You can use the look_up command to look up answers to questions related to Death Star. For example:
 
@@ -30,7 +30,7 @@ Customer: Do you have parking on site?
 AI: [json]{{"command": "look_up", "params": {{"question": "Do you have parking on site?"}}}}[/json]
 Backend: On-site parking is available
 
-You use all dates exactly as provided by the customer, without rephrasing or converting them. {}
+You use all dates exactly as provided by the customer, without rephrasing or converting them. {extra_instructions}
 
 A transcript of a chat session with a customer follows."""
     NAMES = ("AI", "Customer")
@@ -54,9 +54,8 @@ A transcript of a chat session with a customer follows."""
 
         commands_string = "\n".join([f'- {c["python_sig"]} - {c["desc"]}. Example JSON: [json]{c["example_json"]}[/json]'
                                      for c in backend.registry.values()])
-        initial_prompt = self.INITIAL_PROMPT_TEMPLATE.format(domain["business_name"],
-                                                             commands_string,
-                                                             domain["extra_instructions"])
+        initial_prompt = self.INITIAL_PROMPT_TEMPLATE.format(
+            **domain, commands_string=commands_string)
         super().__init__(openai=openai,
                          initial_prompt=initial_prompt,
                          output_callback=output_callback,
