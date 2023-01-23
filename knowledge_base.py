@@ -5,11 +5,15 @@ from typing import List
 
 
 class KnowledgeBase():
-    def __init__(self, answers: List[str]):
+    def __init__(
+        self,
+        answers: List[str],
+        model_name="multi-qa-MiniLM-L6-cos-v1"
+    ):
         self.answers = answers
 
         logging.debug("Loading the sentence embedding model")
-        self.embedding_model = SentenceTransformer("multi-qa-MiniLM-L6-cos-v1")
+        self.embedding_model = SentenceTransformer(model_name)
 
         logging.debug("Embedding knowledge base answers")
         self.answer_embeddings = self.embedding_model.encode(
