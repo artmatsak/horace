@@ -27,12 +27,14 @@ def book_table(name: str, num_people: int, date: str, time: str) -> str:
 
 @backend.command(desc="get booking details", example_params=("YBNAPP",))
 def get_booking_details(reference: str) -> str:
+    reference = _validate_reference(reference)
     logging.debug(f"Getting booking details for ({repr(reference)},)")
     return "Found booking for May Longhorn, 4 people at 8:30 pm on August 3, 2023"
 
 
 @backend.command(desc="change booking", example_params=("ABGTBB", "Willy Tanner", 1, "May 4", "7:30 pm"))
 def change_booking(reference: str, name: str, num_people: int, date: str, time: str) -> str:
+    reference = _validate_reference(reference)
     name = _validate_name(name)
     num_people, time = _validate_table_params(num_people, date, time)
     logging.debug(
@@ -42,8 +44,18 @@ def change_booking(reference: str, name: str, num_people: int, date: str, time: 
 
 @backend.command(desc="cancel a booking", example_params=("HTLYNN",))
 def cancel_booking(reference: str) -> str:
+    reference = _validate_reference(reference)
     logging.debug(f"Canceling booking for ({repr(reference)},)")
     return "Booking canceled"
+
+
+def _validate_reference(reference: str) -> str:
+    reference = str(reference)
+
+    if not reference:
+        raise ValueError("Reference is required")
+
+    return reference
 
 
 def _validate_name(name: str) -> str:
