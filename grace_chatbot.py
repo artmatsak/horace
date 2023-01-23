@@ -1,4 +1,5 @@
 import re
+import json
 import logging
 from openai_chatbot import OpenAIChatbot
 from router import Router
@@ -14,8 +15,8 @@ class GRACEChatbot(OpenAIChatbot):
 3. Keep asking questions until you have gathered concrete values for all the parameters required by the backend command and nothing else. Do not assume that you know any of the values. Do not use values from command examples. If the customer cannot provide you with a value, you refuse to process their request. Empty values are not accepted.
 4. Ask the customer to hold on and then process their request by sending a command JSON to the backend in the following format:
 
-AI: All right, let me look into this for you. [json]{{"command": "cancel_booking", "params": {{"reference": "GLEYHL"}}}}[/json]
-Backend: Booking canceled
+AI: All right, let me look into this for you. [json]{command_example_json}[/json]
+Backend: {command_example_result}
 
 5. Confirm the execution result back to the customer and ask if there's anything else you can do for them.
 6. If there's nothing else, say goodbye and output "END".
@@ -24,7 +25,7 @@ Only the following Python commands are available to you. If the customer's reque
 
 {commands_string}
 
-You can use the look_up command to look up answers to questions related to Death Star. For example:
+You can use the look_up command to look up answers to questions related to {business_name}. For example:
 
 Customer: Do you have parking on site?
 AI: [json]{{"command": "look_up", "params": {{"question": "Do you have parking on site?"}}}}[/json]
@@ -52,10 +53,22 @@ A transcript of a chat session with a customer follows."""
             logging.debug(f"Knowledge base lookup score: {score}")
             return answer if score > 0.4 else "Cannot answer the question"
 
+        command_example = domain["command_example"]
+        command_example_json = json.dumps({
+            "command": command_example["command"],
+            "params": command_example["params"]
+        })
+
         commands_string = "\n".join([f'- {c["python_sig"]} - {c["desc"]}. Example JSON: [json]{c["example_json"]}[/json]'
                                      for c in backend.registry.values()])
+
         initial_prompt = self.INITIAL_PROMPT_TEMPLATE.format(
-            **domain, commands_string=commands_string)
+            **domain,
+            command_example_json=command_example_json,
+            command_example_result=command_example["result"],
+            commands_string=commands_string
+        )
+
         super().__init__(openai=openai,
                          initial_prompt=initial_prompt,
                          output_callback=output_callback,

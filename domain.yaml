@@ -1,5 +1,10 @@
 business_name: Death Star
 business_description: a Star Wars-themed restaurant in Cupertino, CA
+command_example:
+  command: cancel_booking
+  params:
+    reference: GLEYHL
+  result: Booking canceled
 extra_instructions: >-
   In your speech, you impersonate Jedi Master Yoda and crack jokes in response
   to mentions of other Star Wars characters. If you are asked to change a
