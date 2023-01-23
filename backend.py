@@ -1,3 +1,4 @@
+import logging
 from router import Router
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -10,6 +11,8 @@ backend = Router()
 @backend.command(desc="check if table is available for booking", example_params=(5, "tomorrow", "10:15 am"))
 def check_table_availability(num_people: int, date: str, time: str) -> str:
     num_people, time = _validate_table_params(num_people, date, time)
+    logging.debug(
+        f"Checking table availability for ({repr(num_people)}, {repr(time)})")
     return "The table is available"
 
 
@@ -17,11 +20,14 @@ def check_table_availability(num_people: int, date: str, time: str) -> str:
 def book_table(name: str, num_people: int, date: str, time: str) -> str:
     name = _validate_name(name)
     num_people, time = _validate_table_params(num_people, date, time)
+    logging.debug(
+        f"Booking table for ({repr(name)}, {repr(num_people)}, {repr(time)})")
     return "Booking confirmed, reference: YEHBZL"
 
 
 @backend.command(desc="get booking details", example_params=("YBNAPP",))
 def get_booking_details(reference: str) -> str:
+    logging.debug(f"Getting booking details for ({repr(reference)},)")
     return "Found booking for May Longhorn, 4 people at 8:30 pm on August 3, 2023"
 
 
@@ -29,11 +35,14 @@ def get_booking_details(reference: str) -> str:
 def change_booking(reference: str, name: str, num_people: int, date: str, time: str) -> str:
     name = _validate_name(name)
     num_people, time = _validate_table_params(num_people, date, time)
+    logging.debug(
+        f"Changing booking for ({repr(reference)}, {repr(name)}, {repr(num_people)}, {repr(time)})")
     return f"Booking {reference} changed"
 
 
 @backend.command(desc="cancel a booking", example_params=("HTLYNN",))
 def cancel_booking(reference: str) -> str:
+    logging.debug(f"Canceling booking for ({repr(reference)},)")
     return "Booking canceled"
 
 
