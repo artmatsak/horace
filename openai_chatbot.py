@@ -1,6 +1,6 @@
 import string
 import logging
-from typing import Tuple, Callable
+from typing import Tuple, Callable, List
 
 
 class OpenAIChatbot():
@@ -24,15 +24,17 @@ class OpenAIChatbot():
         self.stop = [f"{name}:" for name in names]
 
     def start_session(self):
-        self.prompt = f"{self.initial_prompt}\n"
+        self.prompt = self.initial_prompt
         logging.debug(f"Starting chatbot session with prompt:\n{self.prompt}")
         self._get_all_utterances()
 
-    def send_response(self, response: str):
+    def send_responses(self, responses: List[str]):
         if self.prompt is None:
             raise RuntimeError("Chatbot session is not active")
 
-        self._add_response(self.names[1], response.strip())
+        for response in responses:
+            self._add_response(self.names[1], response.strip())
+
         self._get_all_utterances()
 
     def session_ended(self) -> bool:

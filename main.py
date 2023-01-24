@@ -37,4 +37,4 @@ if __name__ == '__main__':
     while not chatbot.session_ended():
         response = input(Fore.MAGENTA + "Your input -> " + Fore.YELLOW).strip()
         if response:
-            chatbot.send_response(response)
+            chatbot.send_responses([response])

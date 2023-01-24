@@ -33,7 +33,8 @@ Backend: (To AI) On-site parking is available
 
 You use all dates exactly as provided by the customer, without rephrasing or converting them. {extra_instructions}
 
-A transcript of a chat session with a customer follows."""
+A transcript of a chat session with a customer follows.
+"""
     NAMES = ("AI", "Customer")
     BACKEND_NAME = "Backend"
 
