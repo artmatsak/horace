@@ -6,7 +6,7 @@ from router import Router
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import parsedatetime
-from typing import Tuple, Dict, Any
+from typing import Tuple, Dict, Any, Optional
 
 backend = Router()
 
@@ -37,7 +37,7 @@ def check_table_availability(num_people: int, date: str, time: str) -> str:
         f"Checking table availability for ({repr(num_people)}, {repr(time)})")
 
     if not _is_table_available(num_people, time):
-        return "The table is not available"
+        return "No table available for the requested time"
 
     return "The table is available"
 
@@ -51,7 +51,7 @@ def book_table(name: str, num_people: int, date: str, time: str) -> str:
         f"Booking table for ({repr(name)}, {repr(num_people)}, {repr(time)})")
 
     if not _is_table_available(num_people, time):
-        return "The table is not available"
+        return "No table available for the requested time"
 
     while True:
         reference = ''.join(random.choice(
@@ -91,6 +91,8 @@ def change_booking(reference: str, name: str, num_people: int, date: str, time: 
 
     if reference not in bookings:
         return f"No such booking: {reference}"
+    elif not _is_table_available(num_people, time, ignore_reference=reference):
+        return "No table available for the requested time"
 
     bookings[reference] = {
         "name": name,
@@ -163,12 +165,19 @@ def _validate_table_params(num_people: int, date: str, time: str) -> Tuple[int, 
     return num_people, time
 
 
-def _is_table_available(num_people: int, time: datetime) -> bool:
+def _is_table_available(
+    num_people: int,
+    time: datetime,
+    ignore_reference: Optional[str] = None
+) -> bool:
     # We only have one table at the restaurant and assume an average visit
     # duration of 2 hours
     previous_time = time - relativedelta(hours=2)
     next_time = time + relativedelta(hours=2)
-    for booking in bookings.values():
+    for reference, booking in bookings.items():
+        if ignore_reference is not None and reference == ignore_reference:
+            continue
+
         if previous_time < booking["time"] < next_time:
             return False
 
