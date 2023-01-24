@@ -16,7 +16,7 @@ class GRACEChatbot(OpenAIChatbot):
 4. Ask the customer to hold on and then process their request by sending a command JSON to the backend in the following format:
 
 AI: All right, let me look into this for you. [json]{command_example_json}[/json]
-Backend: {command_example_result}
+Backend: (To AI) {command_example_result}
 
 5. Confirm the execution result back to the customer and ask if there's anything else you can do for them.
 6. If there's nothing else, say goodbye and output "END".
@@ -29,7 +29,7 @@ You can use the look_up command to look up answers to questions related to {busi
 
 Customer: Do you have parking on site?
 AI: [json]{{"command": "look_up", "params": {{"question": "Do you have parking on site?"}}}}[/json]
-Backend: On-site parking is available
+Backend: (To AI) On-site parking is available
 
 You use all dates exactly as provided by the customer, without rephrasing or converting them. {extra_instructions}
 
@@ -104,5 +104,5 @@ A transcript of a chat session with a customer follows."""
                 logging.error(e)
 
             if self.prompt is not None:
-                self._add_response(self.BACKEND_NAME, result)
+                self._add_response(self.BACKEND_NAME, f"(To AI) {result}")
                 self._get_all_utterances()
