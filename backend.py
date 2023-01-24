@@ -6,7 +6,7 @@ from router import Router
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import parsedatetime
-from typing import Tuple
+from typing import Tuple, Dict, Any
 
 backend = Router()
 
@@ -65,7 +65,7 @@ def book_table(name: str, num_people: int, date: str, time: str) -> str:
         "time": time
     }
 
-    return f"Booking confirmed, reference: {reference}"
+    return "Booking confirmed: {}. Reference: {}".format(_format_booking(bookings[reference]), reference)
 
 
 @backend.command(desc="get booking details", example_params=("YBNAPP",))
@@ -77,12 +77,7 @@ def get_booking_details(reference: str) -> str:
     if reference not in bookings:
         return f"No such booking: {reference}"
 
-    booking = bookings[reference]
-    num_people_fmt = "1 person" if booking["num_people"] == 1 \
-                     else f'{booking["num_people"]} people'
-    time_fmt = booking["time"].strftime("%-I:%M %p on %B %-d, %Y")
-
-    return "Found booking for {}, {} at {}".format(booking["name"], num_people_fmt, time_fmt)
+    return "Found booking: {}".format(_format_booking(bookings[reference]))
 
 
 @backend.command(desc="change booking", example_params=("ABGTBB", "Willy Tanner", 1, "May 4", "7:30 pm"))
@@ -103,7 +98,7 @@ def change_booking(reference: str, name: str, num_people: int, date: str, time: 
         "time": time
     }
 
-    return f"Booking {reference} changed"
+    return "Booking {} changed: {}".format(reference, _format_booking(bookings[reference]))
 
 
 @backend.command(desc="cancel a booking", example_params=("HTLYNN",))
@@ -178,3 +173,10 @@ def _is_table_available(num_people: int, time: datetime) -> bool:
             return False
 
     return True
+
+
+def _format_booking(booking: Dict[str, Any]) -> str:
+    num_people_fmt = "1 person" if booking["num_people"] == 1 \
+                     else f'{booking["num_people"]} people'
+    time_fmt = booking["time"].strftime("%-I:%M %p on %B %-d, %Y")
+    return "{}, {} at {}".format(booking["name"], num_people_fmt, time_fmt)
