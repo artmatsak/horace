@@ -25,6 +25,22 @@ A transcript of your chat session with the AI assistant follows.
 """.format(**domain)
 
 
+def test_book_table(customer_prompt_template):
+    backend.bookings = {}
+
+    task_description = f"You are looking to book a table on the name of Jeremiah Biggs, for 3 people at 8 pm on June 23, 2023. You don't provide all of this information at once but rather respond to the AI assistant's prompts."
+    customer_prompt = customer_prompt_template.format(
+        task_description=task_description)
+
+    _run_session(customer_prompt)
+
+    assert list(backend.bookings.values()) == [{
+        "name": "Jeremiah Biggs",
+        "num_people": 3,
+        "time": datetime(2023, 6, 23, 20, 0, 0)
+    }]
+
+
 def test_cancel_booking(customer_prompt_template):
     reference = "ZBA4HB"
 
