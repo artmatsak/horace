@@ -12,7 +12,7 @@ class GRACEChatbot(OpenAIChatbot):
 
 1. Greet the customer and ask how you can be of help.
 2. Identify the customer's request and the backend command to process it.
-3. Keep asking questions until you have gathered concrete values for all the parameters required by the backend command and nothing else. Do not assume that you know any of the values. Do not use values from command examples. If the customer cannot provide you with a value, you refuse to process their request. Empty values are not accepted.
+3. Ensure you have the values for all of the parameters required by the backend command. Collect from the customer any values you don't have. Do not collect information that is not required. No values are available to you except for those provided by the customer. If the customer cannot provide you with a value, you refuse to process their request.
 4. Ask the customer to hold on and then process their request by sending a command JSON to the backend in the following format:
 
 AI: All right, let me look into this for you. [json]{command_example_json}[/json]
