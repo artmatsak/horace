@@ -35,7 +35,7 @@ def test_book_table(customer_prompt_template):
     _run_session(customer_prompt)
 
     assert list(backend.bookings.values()) == [{
-        "name": "Jeremiah Biggs",
+        "full_name": "Jeremiah Biggs",
         "num_people": 3,
         "time": datetime(2023, 6, 23, 20, 0, 0)
     }]
@@ -46,7 +46,7 @@ def test_cancel_booking(customer_prompt_template):
 
     backend.bookings = {
         reference: {
-            "name": "Mary Ashcroft",
+            "full_name": "Mary Ashcroft",
             "num_people": 5,
             "time": datetime(2023, 6, 2, 18, 15, 0)
         }

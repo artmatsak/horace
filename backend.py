@@ -12,17 +12,17 @@ backend = Router()
 
 bookings = {
     "YBZ6HN": {
-        "name": "Mary Ashcroft",
+        "full_name": "Mary Ashcroft",
         "num_people": 5,
         "time": datetime(2023, 6, 2, 18, 15, 0)
     },
     "BZ2NLH": {
-        "name": "James Jameson",
+        "full_name": "James Jameson",
         "num_people": 2,
         "time": datetime(2023, 5, 22, 10, 30, 0)
     },
     "7BNZPN": {
-        "name": "Julia Robbins",
+        "full_name": "Julia Robbins",
         "num_people": 4,
         "time": datetime(2024, 1, 6, 19, 0, 0)
     }
@@ -43,12 +43,12 @@ def check_table_availability(num_people: int, date: str, time: str) -> str:
 
 
 @backend.command(desc="book a table", example_params=("Jose James", 2, "next Friday", "6:00 pm"))
-def book_table(name: str, num_people: int, date: str, time: str) -> str:
-    name = _validate_name(name)
+def book_table(full_name: str, num_people: int, date: str, time: str) -> str:
+    full_name = _validate_full_name(full_name)
     num_people, time = _validate_table_params(num_people, date, time)
 
     logging.debug(
-        f"Booking table for ({repr(name)}, {repr(num_people)}, {repr(time)})")
+        f"Booking table for ({repr(full_name)}, {repr(num_people)}, {repr(time)})")
 
     if not _is_table_available(num_people, time):
         return "No table available for the requested time"
@@ -60,7 +60,7 @@ def book_table(name: str, num_people: int, date: str, time: str) -> str:
             break
 
     bookings[reference] = {
-        "name": name,
+        "full_name": full_name,
         "num_people": num_people,
         "time": time
     }
@@ -81,13 +81,13 @@ def get_booking_details(reference: str) -> str:
 
 
 @backend.command(desc="change booking", example_params=("ABGTBB", "Willy Tanner", 1, "May 4", "7:30 pm"))
-def change_booking(reference: str, name: str, num_people: int, date: str, time: str) -> str:
+def change_booking(reference: str, full_name: str, num_people: int, date: str, time: str) -> str:
     reference = _validate_reference(reference)
-    name = _validate_name(name)
+    full_name = _validate_full_name(full_name)
     num_people, time = _validate_table_params(num_people, date, time)
 
     logging.debug(
-        f"Changing booking for ({repr(reference)}, {repr(name)}, {repr(num_people)}, {repr(time)})")
+        f"Changing booking for ({repr(reference)}, {repr(full_name)}, {repr(num_people)}, {repr(time)})")
 
     if reference not in bookings:
         return f"No such booking: {reference}"
@@ -95,7 +95,7 @@ def change_booking(reference: str, name: str, num_people: int, date: str, time: 
         return "No table available for the requested time"
 
     bookings[reference] = {
-        "name": name,
+        "full_name": full_name,
         "num_people": num_people,
         "time": time
     }
@@ -129,13 +129,13 @@ def _validate_reference(reference: str) -> str:
     return reference
 
 
-def _validate_name(name: str) -> str:
-    name = str(name)
+def _validate_full_name(full_name: str) -> str:
+    full_name = str(full_name)
 
-    if not name:
-        raise ValueError("Name is required")
+    if not full_name:
+        raise ValueError("Full name is required")
 
-    return name
+    return full_name
 
 
 def _validate_table_params(num_people: int, date: str, time: str) -> Tuple[int, datetime]:
@@ -188,4 +188,4 @@ def _format_booking(booking: Dict[str, Any]) -> str:
     num_people_fmt = "1 person" if booking["num_people"] == 1 \
                      else f'{booking["num_people"]} people'
     time_fmt = booking["time"].strftime("%-I:%M %p on %B %-d, %Y")
-    return "{}, {} at {}".format(booking["name"], num_people_fmt, time_fmt)
+    return "{}, {} at {}".format(booking["full_name"], num_people_fmt, time_fmt)
