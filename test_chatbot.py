@@ -19,7 +19,7 @@ with open("domain.yaml", "r") as stream:
 
 @pytest.fixture
 def customer_prompt_template() -> str:
-    return """You are a customer of {business_name}, {business_description} are chatting to the restaurant's AI assistant. {{task_description}}
+    return """You are a customer of {business_name}, {business_description}. You are chatting to the restaurant's AI assistant. {{task_description}}
 
 A transcript of your chat session with the AI assistant follows.
 """.format(**domain)
