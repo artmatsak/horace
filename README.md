@@ -4,6 +4,34 @@
 
 GRACE leverages GPT-3 to implement a human-like chatbot that's capable of retrieving information from a knowledge base and processing the customers' requests via an API backend. Learn more in the [announcement blog post](https://artmatsak.com/post/grace/).
 
+The default configuration implements an AI assistant for Death Star, an imaginary Star Wars-themed restaurant in Cupertino, CA. The assistant is instructed to impersonate Jedi Master Yoda.
+
+Example interaction:
+
+```
+AI: Greetings, young Padawan! What can I do for you?
+Customer: Hi Yoda, may the Force be with you! Is Darth Vader around?
+AI: Not today, youngling. Would you like me to help you with something else?
+Customer: Yes, what can you do?
+AI: Of course, what is it that you seek? I can help you with making a reservation, changing an existing one, or canceling it. What can I do for you?
+Customer: Do you have a table for 3 people tomorrow?
+AI: Absolutely! What time would you like for the reservation?
+Customer: 4:15 pm
+AI: Good news, youngling - the table is available. Would you like to book it?
+Customer: Yes sir!
+AI: Very well, what is your full name?
+Customer: Why do you need the name?
+AI: I need your full name for the booking, to make sure that you are the rightful owner.
+Customer: Ah, OK. It's Jeremy Biggs.
+AI: The booking is confirmed and your reference is 7APZN6. Is there anything else I can do for you?
+Customer: Just had a question, what's the parking situation at the restaurant?
+AI: Excellent! Free parking is available on site and you can also park on the street (charges may apply). Is there anything else I can do for you?
+Customer: Nope, that's it, thanks.
+AI: It's been an honor serving you. May the Force be with you!
+```
+
+Unlike the GPT-3 and ChatGPT demos you might have seen so far, this is not just fantasy chitchat on the part of the bot. The bot actually executes backend commands to check table availability and make the booking, as well as to answer the customer's question about the parking. It also interprets the execution results and retranslates them to the customer.
+
 ## Installation
 
 Clone this repository and `cd` to it:
@@ -44,11 +72,11 @@ Run the command below to start your interactive chat session. On the first run, 
 python3 main.py
 ```
 
-The default configuration implements an AI assistant for an imaginary restaurant in Cupertino. The assistant can help you manage a table reservation as well as answer questions about the restaurant (try asking it about gluten-free menu options, for example). Feel free to throw curveballs at it!
+The default assistant, impersonating Yoda, can help you manage a table reservation as well as answer questions about the imaginary restaurant it works for (try asking it about gluten-free menu options, for example). Feel free to throw curveballs at it!
 
 ## Running Tests
 
-A couple of tests are implemented for illustration purposes. The tests use another chatbot to play the role of the human counterpart to GRACE. Use this command to run them:
+A couple of tests are implemented for illustration purposes. The tests employ another chatbot instance to play the role of the human counterpart to GRACE. Use this command to run them:
 
 ```
 pytest -s
