@@ -10,6 +10,7 @@ from typing import Tuple, Dict, Any, Optional
 
 backend = Router()
 
+# Our booking "database" is a simple dict with some pre-populated entries
 bookings = {
     "YBZ6HN": {
         "full_name": "Mary Ashcroft",
@@ -29,8 +30,16 @@ bookings = {
 }
 
 
+# The @backend.command() decorator makes a Python function available to the
+# chatbot as a backend command. For each command, you need to provide a short
+# description and example parameters.
+# Keep command and parameter names simple and descriptive to make it easier
+# for the bot to "understand" what they do and how to use them.
 @backend.command(desc="check if table is available for booking", example_params=(5, "tomorrow", "10:15 am"))
 def check_table_availability(num_people: int, date: str, time: str) -> str:
+    # Since our parameters will be coming from a language model, we can't take
+    # chances and must validate them. At the very minimum, validation should
+    # include casting of the parameters to the expected types.
     num_people, time = _validate_table_params(num_people, date, time)
 
     logging.debug(
@@ -39,6 +48,9 @@ def check_table_availability(num_people: int, date: str, time: str) -> str:
     if not _is_table_available(num_people, time):
         return "No table available for the requested time"
 
+    # The return value will be included in the prompt verbatim, as a backend
+    # utterance. Use natural language to communicate the execution result to
+    # the chatbot.
     return "The table is available"
 
 

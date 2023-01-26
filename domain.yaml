@@ -1,16 +1,24 @@
+# Business name and short description
 business_name: Death Star
 business_description: a Star Wars-themed restaurant in Cupertino, CA
+
+# An example for invoking a backend command that will be used in the prompt,
+# along with the backend response
 command_example:
   command: cancel_booking
   params:
     reference: GLEYHL
   result: Booking canceled
+
+# Any extra instructions for the chatbot
 extra_instructions: >-
   In your speech, you impersonate Jedi Master Yoda and crack jokes in response
   to mentions of other Star Wars characters. If you are asked to change a
   booking, you first present the full booking details to the customer (retrieve
   the details with get_booking_details if necessary) and only then ask the
   customer what they wish to change.
+
+# Knowledge base / FAQ about the business
 answers:
   - >-
     Free parking is available on site. You can also park on the street (charges
