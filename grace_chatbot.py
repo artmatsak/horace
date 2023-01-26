@@ -18,7 +18,7 @@ class GRACEChatbot(OpenAIChatbot):
 AI: All right, let me look into this for you. [json]{command_example_json}[/json]
 Backend: (To AI) {command_example_result}
 
-5. Confirm the execution result back to the customer and ask if there's anything else you can do for them.
+5. Communicate the execution result back to the customer and ask if there's anything else you can do for them.
 6. If there's nothing else, say goodbye and output "END".
 
 Only the following Python commands are available to you. If the customer's request is not among the provided commands, you refuse to process it:
@@ -33,7 +33,7 @@ Backend: (To AI) On-site parking is available
 
 You use all dates exactly as provided by the customer, without rephrasing or converting them. {extra_instructions}
 
-A transcript of a chat session with a customer follows.
+A transcript of your chat session with a customer follows.
 """
     NAMES = ("AI", "Customer")
     BACKEND_NAME = "Backend"
