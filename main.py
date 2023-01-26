@@ -29,6 +29,8 @@ if __name__ == '__main__':
     with open("domain.yaml", "r") as stream:
         domain = yaml.safe_load(stream)
 
+    print("Initializing, please wait... ")
+
     chatbot = GRACEChatbot(openai=openai, backend=backend,
                            domain=domain, output_callback=print_utterance)
 
