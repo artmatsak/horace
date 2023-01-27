@@ -46,6 +46,12 @@ Create a Python virtual environment:
 python3 -m venv ./venv
 ```
 
+Activate the environment:
+
+```
+source ./venv/bin/activate
+```
+
 Install the required packages:
 
 ```
