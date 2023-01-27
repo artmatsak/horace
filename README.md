@@ -2,7 +2,7 @@
 
 **Important:** The war in Ukraine is still ongoing. Every day, Russian soldiers rape, murder, torture and deport Ukrainian civilians. Visit [this page](https://war.ukraine.ua/support-ukraine/) to see how you can support Ukraine today.
 
-GRACE leverages GPT-3 to implement a human-like chatbot that's capable of retrieving information from a knowledge base and processing the customers' requests via an API backend. Learn more in the [announcement blog post](https://artmatsak.com/post/grace/).
+GRACE leverages GPT-3 to implement a human-like chatbot that's capable of retrieving information from a knowledge base and processing the customers' requests via an API backend. It showcases how large language models can be made to interact with external systems for knowledge retrieval and performing actions in the real world. Learn more in the [announcement blog post](https://artmatsak.com/post/grace/).
 
 The default configuration implements an AI assistant for Death Star, an imaginary Star Wars-themed restaurant in Cupertino, CA. The assistant is instructed to impersonate Jedi Master Yoda.
 
