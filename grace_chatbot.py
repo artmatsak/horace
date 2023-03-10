@@ -44,7 +44,7 @@ A transcript of your chat session with a customer follows.
         backend: Router,
         domain: Dict[str, str],
         output_callback: Callable[[str], None],
-        openai_engine: str = "text-davinci-003"
+        openai_engine: str = "gpt-3.5-turbo"
     ):
         self.knowledge_base = KnowledgeBase(domain["answers"])
 
@@ -83,16 +83,16 @@ A transcript of your chat session with a customer follows.
     def _get_all_utterances(self):
         utterance = self._get_next_utterance()
 
-        m = re.match(r"((.*?)($|\[json\](.*?)\[/json\]))",
-                     utterance, re.IGNORECASE | re.MULTILINE | re.DOTALL)
-        utterance = m[2].strip()
-        command_json = m[4]
+        m = re.match(r"(.*?)($|\[json\](.*?)\[/json\])",
+                     utterance, re.IGNORECASE | re.DOTALL)
+        utterance = m[1].strip()
+        command_json = m[3]
 
         if utterance:
             self.output_callback(utterance)
 
         if self.prompt is not None:
-            self.prompt = f"{self.prompt} {m[1]}"
+            self.prompt = f"{self.prompt} {m[0]}"
 
         if command_json:
             logging.debug(f"Invoking backend command: {repr(command_json)}")

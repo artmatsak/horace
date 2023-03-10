@@ -4,6 +4,10 @@ from typing import Tuple, Callable, List
 
 
 class OpenAIChatbot():
+    ROLE_SYSTEM = "system"
+    ROLE_USER = "user"
+    ROLE_ASSISTANT = "assistant"
+
     def __init__(
         self,
         openai,
@@ -11,7 +15,7 @@ class OpenAIChatbot():
         output_callback: Callable[[str], None],
         names: Tuple[str, str] = ("AI", "Human"),
         end_token: str = "END",
-        openai_engine: str = "text-davinci-003"
+        openai_engine: str = "gpt-3.5-turbo"
     ):
         self.openai = openai
         self.initial_prompt = initial_prompt
@@ -57,15 +61,15 @@ class OpenAIChatbot():
     def _get_next_utterance(self) -> str:
         self.prompt += f"\n{self.names[0]}:"
 
-        completion = self.openai.Completion.create(
-            engine=self.openai_engine,
-            prompt=self.prompt,
+        completion = self.openai.ChatCompletion.create(
+            model=self.openai_engine,
+            messages=[{"role": self.ROLE_SYSTEM, "content": self.prompt}],
             max_tokens=150,
             stop=self.stop,
             temperature=0.9
         )
 
-        utterance = completion.choices[0]["text"].strip(
+        utterance = completion['choices'][0]['message']['content'].strip(
             string.whitespace + '"')
         logging.debug(f"Got utterance: {repr(utterance)}")
 
