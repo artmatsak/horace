@@ -136,7 +136,7 @@ def _validate_reference(reference: str) -> str:
         raise ValueError("Reference is required")
     elif not re.fullmatch(r"[A-Z0-9]{6}", reference):
         raise ValueError(f"Invalid reference: {reference}. References consist"
-                         "of 6 digits and/or uppercase letters")
+                         " of 6 digits and/or uppercase letters")
 
     return reference
 
