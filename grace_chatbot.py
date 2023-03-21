@@ -44,7 +44,8 @@ A transcript of your chat session with a customer follows.
         backend: Router,
         domain: Dict[str, str],
         output_callback: Callable[[str], None],
-        openai_engine: str = "gpt-3.5-turbo"
+        openai_model: str = "text-davinci-003",
+        openai_endpoint: str = "completions"
     ):
         self.knowledge_base = KnowledgeBase(domain["answers"])
 
@@ -74,7 +75,8 @@ A transcript of your chat session with a customer follows.
                          initial_prompt=initial_prompt,
                          output_callback=output_callback,
                          names=self.NAMES,
-                         openai_engine=openai_engine)
+                         openai_model=openai_model,
+                         openai_endpoint=openai_endpoint)
 
         self.stop.append(f"{self.BACKEND_NAME}:")
         self.backend = backend

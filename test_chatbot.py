@@ -13,6 +13,8 @@ load_dotenv()
 
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
+with open("config.yaml", "r") as stream:
+    config = yaml.safe_load(stream)
 with open("domain.yaml", "r") as stream:
     domain = yaml.safe_load(stream)
 
@@ -69,7 +71,9 @@ def _run_session(customer_prompt: str):
         openai=openai,
         backend=backend.backend,
         domain=domain,
-        output_callback=lambda u: ai_utterances.append(u)
+        output_callback=lambda u: ai_utterances.append(u),
+        openai_model=config["openai"]["model"],
+        openai_endpoint=config["openai"]["endpoint"]
     )
 
     ai_chatbot.start_session()
@@ -82,7 +86,10 @@ def _run_session(customer_prompt: str):
         openai=openai,
         initial_prompt=customer_prompt,
         output_callback=lambda u: customer_utterances.append(u),
-        names=("Customer", "AI"))
+        names=("Customer", "AI"),
+        openai_model=config["openai"]["model"],
+        openai_endpoint=config["openai"]["endpoint"]
+    )
 
     customer_chatbot.start_session()
 

@@ -26,13 +26,17 @@ if __name__ == '__main__':
 
     openai.api_key = os.environ["OPENAI_API_KEY"]
 
+    with open("config.yaml", "r") as stream:
+        config = yaml.safe_load(stream)
     with open("domain.yaml", "r") as stream:
         domain = yaml.safe_load(stream)
 
     print("Initializing, please wait... ")
 
     chatbot = GRACEChatbot(openai=openai, backend=backend,
-                           domain=domain, output_callback=print_utterance)
+                           domain=domain, output_callback=print_utterance,
+                           openai_model=config["openai"]["model"],
+                           openai_endpoint=config["openai"]["endpoint"])
 
     chatbot.start_session()
 
