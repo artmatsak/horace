@@ -11,6 +11,9 @@ import pytest
 
 load_dotenv()
 
+# Suppress the tokenizers parallelism warning
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
 with open("config.yaml", "r") as stream:
