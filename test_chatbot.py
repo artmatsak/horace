@@ -46,6 +46,30 @@ def test_book_table(customer_prompt_template):
     }]
 
 
+def test_change_booking(customer_prompt_template):
+    reference = "S8W308"
+
+    backend.bookings = {
+        reference: {
+            "full_name": "Ann Hicks",
+            "num_people": 4,
+            "time": datetime(2023, 7, 14, 18, 0, 0)
+        }
+    }
+
+    task_description = f"You'd like to change a table booking with reference {reference} that you made earlier. You're looking to change it from 4 people to 3 people and from 6 PM to 5:30 PM. You don't provide all of this information at once but rather respond to the AI assistant's prompts."
+    customer_prompt = customer_prompt_template.format(
+        task_description=task_description)
+
+    _run_session(customer_prompt)
+
+    assert list(backend.bookings.values()) == [{
+        "full_name": "Ann Hicks",
+        "num_people": 3,
+        "time": datetime(2023, 7, 14, 17, 30, 0)
+    }]
+
+
 def test_cancel_booking(customer_prompt_template):
     reference = "ZBA4HB"
 
