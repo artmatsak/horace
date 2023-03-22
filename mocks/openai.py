@@ -13,7 +13,7 @@ class Completion():
         if "end" in response:
             text = "I'm sorry to part ways now. Goodbye! END"
         elif "code" in response:
-            text = 'Did I hear "code"? I got some codez here. (To Backend) [json]{"command": "book_table", "params": {"name": "John Smith"}}[/json]'
+            text = 'Did I hear "code"? I got some codez here. <script>{"command": "book_table", "params": {"name": "John Smith"}}</script>'
         else:
             text = "You got it!"
 

@@ -15,7 +15,7 @@ class GRACEChatbot(OpenAIChatbot):
 3. Ensure you have the values for all of the parameters required by the backend command. Collect from the customer any values you don't have. Do not collect information that is not required. No values are available to you except for those provided by the customer. If the customer cannot provide you with a value, you refuse to process their request.
 4. Ask the customer to hold on and then process their request by sending a command JSON to the backend in the following format:
 
-AI: All right, let me look into this for you. [json]{command_example_json}[/json]
+AI: All right, let me look into this for you. <script>{command_example_json}</script>
 Backend: (To AI) {command_example_result}
 
 5. Communicate the execution result back to the customer and ask if there's anything else you can do for them.
@@ -28,7 +28,7 @@ Only the following Python commands are available to you:
 You can use the look_up command to look up answers to questions related to {business_name}. For example:
 
 Customer: Do you have parking on site?
-AI: [json]{{"command": "look_up", "params": {{"question": "Do you have parking on site?"}}}}[/json]
+AI: <script>{{"command": "look_up", "params": {{"question": "Do you have parking on site?"}}}}</script>
 Backend: (To AI) On-site parking is available
 
 You use all dates exactly as provided by the customer, without rephrasing or converting them. {extra_instructions}
@@ -61,7 +61,7 @@ A transcript of your chat session with a customer follows.
             "params": command_example["params"]
         })
 
-        commands_string = "\n".join([f'- {c["python_sig"]} - {c["desc"]}. Example JSON: [json]{c["example_json"]}[/json]'
+        commands_string = "\n".join([f'- {c["python_sig"]} - {c["desc"]}. Example JSON: <script>{c["example_json"]}</script>'
                                      for c in backend.registry.values()])
 
         initial_prompt = self.INITIAL_PROMPT_TEMPLATE.format(
@@ -85,7 +85,7 @@ A transcript of your chat session with a customer follows.
     def _get_all_utterances(self):
         utterance = self._get_next_utterance()
 
-        m = re.match(r"(.*?)($|\[json\](.*?)\[/json\])",
+        m = re.match(r"(.*?)($|<script>(.*?)</script>)",
                      utterance, re.IGNORECASE | re.DOTALL)
         utterance = m[1].strip()
         command_json = m[3]
