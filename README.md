@@ -4,7 +4,7 @@
 
 GRACE leverages the OpenAI API to implement a human-like chatbot that's capable of retrieving information from a knowledge base and processing the customers' requests via an API backend. It showcases how large language models can be made to interact with external systems for knowledge retrieval and performing actions in the real world. Learn more in the [announcement blog post](https://artmatsak.com/post/grace/).
 
-**Update March 11, 2023:** GRACE can now use the `gpt-3.5-turbo` model with OpenAI's new chat completion API. This enables 10x API cost savings compared to the default `text-davinci-003` model, but the chatbot performance may be slightly worse. See `config.yaml`.
+**Update March 28, 2023:** Added support for GPT-4 in addition to ChatGPT and the default `text-davinci-003` model.
 
 The default configuration implements an AI assistant for Death Star, an imaginary Star Wars-themed restaurant in Cupertino, CA. The assistant is instructed to impersonate Jedi Master Yoda.
 
@@ -89,6 +89,12 @@ A couple of tests are implemented for illustration purposes. The tests employ an
 ```
 pytest -s
 ```
+
+## Model Selection
+
+In addition to the default `text-davinci-003` model, GRACE can also work with ChatGPT and GPT-4. See `config.yaml` for the details and example settings.
+
+GPT-4 is the best, but also the most expensive. The default `text-davinci-003` is cheaper but still produces excellent results. ChatGPT is the cheapest but may suffer from a number of issues (hallucinations, failure to execute commands etc.)
 
 ## Chatbot Customization
 
