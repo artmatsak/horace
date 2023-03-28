@@ -2,9 +2,8 @@ import os
 import yaml
 # import mocks.openai as openai
 import openai
-import backend
 from openai_chatbot import OpenAIChatbot
-from grace_chatbot import GRACEChatbot
+from horace_chatbot import HoraceChatbot
 from datetime import datetime
 from dotenv import load_dotenv
 import pytest
@@ -94,7 +93,7 @@ def _run_session(customer_prompt: str):
     ai_utterances = []
     customer_utterances = []
 
-    ai_chatbot = GRACEChatbot(
+    ai_chatbot = HoraceChatbot(
         openai=openai,
         backend=backend.backend,
         domain=domain,

@@ -4,8 +4,8 @@ import logging
 from colorama import Fore, Style
 # import mocks.openai as openai
 import openai
-from backend import backend
-from grace_chatbot import GRACEChatbot
+from router import Router
+from horace_chatbot import HoraceChatbot
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -24,9 +24,6 @@ if __name__ == '__main__':
     openai_logger = logging.getLogger("openai")
     openai_logger.setLevel(logging.ERROR)
 
-    # Suppress the tokenizers parallelism warning
-    os.environ["TOKENIZERS_PARALLELISM"] = "false"
-
     openai.api_key = os.environ["OPENAI_API_KEY"]
 
     with open("config.yaml", "r") as stream:
@@ -36,10 +33,14 @@ if __name__ == '__main__':
 
     print("Initializing, please wait... ")
 
-    chatbot = GRACEChatbot(openai=openai, backend=backend,
-                           domain=domain, output_callback=print_utterance,
-                           openai_model=config["openai"]["model"],
-                           openai_endpoint=config["openai"]["endpoint"])
+    chatbot = HoraceChatbot(
+        openai=openai,
+        backend=Router(plugins=config["plugins"]),
+        domain=domain,
+        output_callback=print_utterance,
+        openai_model=config["openai"]["model"],
+        openai_endpoint=config["openai"]["endpoint"]
+    )
 
     chatbot.start_session()
 

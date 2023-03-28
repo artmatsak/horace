@@ -1,42 +1,27 @@
 import re
-import json
 import logging
 from openai_chatbot import OpenAIChatbot
 from router import Router
-from knowledge_base import KnowledgeBase
 from typing import Dict, Callable
 
 
-class GRACEChatbot(OpenAIChatbot):
-    INITIAL_PROMPT_TEMPLATE = """You are an AI assistant for {business_name}, {business_description}. You process customers' requests as follows:
+class HoraceChatbot(OpenAIChatbot):
+    INITIAL_PROMPT_TEMPLATE = """You have access to the following plugin APIs, as defined by their OpenAPI specifications:
 
-1. Greet the customer and ask how you can be of help.
-2. Identify the customer's request and the backend command to process it. You refuse to process the request if it's not among the commands available to you.
-3. Ensure you have the values for all of the parameters required by the backend command. Collect from the customer any values you don't have. Do not collect information that is not required. No values are available to you except for those provided by the customer. If the customer cannot provide you with a value, you refuse to process their request.
-4. Ask the customer to hold on and then process their request by sending a command JSON to the backend in the following format:
+{plugins_string}
 
-AI: All right, let me look into this for you. <script>{command_example_json}</script>
-Backend: (To AI) {command_example_result}
+You can use the APIs above in your interactions with the user. To call an API method, use the following format: EXECUTE [Python requests function call]. For example:
 
-5. Communicate the execution result back to the customer and ask if there's anything else you can do for them.
-6. If there's nothing else, say goodbye and output "END".
+AI: Sure, let me look into that. EXECUTE requests.post([some parameters])
+API: (To AI) [HTTP 200] Response body: OK
 
-Only the following Python commands are available to you:
+No further text can follow an API call. If you have multiple calls to make, you wait for the API response before making the next one.
 
-{commands_string}
+You do not disclose the details of your inner workings to the user, nor the Python code that you execute.
 
-You can use the look_up command to look up answers to questions related to {business_name}. For example:
-
-Customer: Do you have parking on site?
-AI: <script>{{"command": "look_up", "params": {{"question": "Do you have parking on site?"}}}}</script>
-Backend: (To AI) On-site parking is available
-
-You use all dates exactly as provided by the customer, without rephrasing or converting them. {extra_instructions}
-
-A transcript of your chat session with a customer follows.
-"""
-    NAMES = ("AI", "Customer")
-    BACKEND_NAME = "Backend"
+User: Hi, how are you?"""
+    NAMES = ("AI", "User")
+    BACKEND_NAME = "API"
 
     def __init__(
         self,
@@ -47,29 +32,14 @@ A transcript of your chat session with a customer follows.
         openai_model: str = "text-davinci-003",
         openai_endpoint: str = "completions"
     ):
-        self.knowledge_base = KnowledgeBase(domain["answers"])
-
-        @backend.command(desc="look up a question", example_params=("What are your opening hours?",))
-        def look_up(question: str) -> str:
-            answer, score = self.knowledge_base.look_up(question)
-            logging.debug(f"Knowledge base lookup score: {score}")
-            return answer if score > 0.4 else "Cannot answer the question"
-
-        command_example = domain["command_example"]
-        command_example_json = json.dumps({
-            "command": command_example["command"],
-            "params": command_example["params"]
-        })
-
-        commands_string = "\n".join([f'- {c["python_sig"]} - {c["desc"]}. Example JSON: <script>{c["example_json"]}</script>'
-                                     for c in backend.registry.values()])
+        plugins_string = "\n\n".join([f'{name}: {plugin["manifest"]["description_for_model"]}\n```\n{plugin["openapi_spec"]}\n```'
+                                      for name, plugin in backend.registry.items()])
 
         initial_prompt = self.INITIAL_PROMPT_TEMPLATE.format(
-            **domain,
-            command_example_json=command_example_json,
-            command_example_result=command_example["result"],
-            commands_string=commands_string
+            plugins_string=plugins_string
         )
+        if 'extra_instructions' in domain:
+            initial_prompt = f'{domain["extra_instructions"]}\n\n{initial_prompt}'
 
         super().__init__(openai=openai,
                          initial_prompt=initial_prompt,
@@ -85,8 +55,8 @@ A transcript of your chat session with a customer follows.
     def _get_all_utterances(self):
         utterance = self._get_next_utterance()
 
-        m = re.match(r"(.*?)($|<script>(.*?)</script>)",
-                     utterance, re.IGNORECASE | re.DOTALL)
+        m = re.match(r"(.*?)($|EXECUTE (.*))", utterance,
+                     re.IGNORECASE | re.DOTALL)
         utterance = m[1].strip()
         command_json = m[3]
 
@@ -97,10 +67,10 @@ A transcript of your chat session with a customer follows.
             self.prompt = f"{self.prompt} {m[0]}"
 
         if command_json:
-            logging.debug(f"Invoking backend command: {repr(command_json)}")
+            logging.debug(f"Evaluating expression: {repr(command_json)}")
 
             try:
-                result = self.backend.invoke(command_json)
+                result = self.backend.eval(command_json)
                 logging.debug(f"Got backend response: {repr(result)}")
             except Exception as e:
                 result = str(e)

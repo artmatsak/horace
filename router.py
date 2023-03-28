@@ -1,46 +1,32 @@
 import json
-from inspect import Signature, signature
+import requests
+from urllib.parse import urlunsplit
+from typing import List
 
 
 class Router():
-    def __init__(self):
+    def __init__(self, plugins: List[str]):
         self.registry = {}
+        for netloc in plugins:
+            manifest_url = urlunsplit(
+                ('http', netloc, '/.well-known/ai-plugin.json', '', ''))
+            response = requests.get(manifest_url)
+            response.raise_for_status()
+            manifest = json.loads(response.text)
 
-    def command(self, desc: str, example_params: tuple):
-        def decorator(func):
-            # Remove "return" annotation from signature
-            sig = signature(func).replace(return_annotation=Signature.empty)
+            response = requests.get(manifest["api"]["url"])
+            response.raise_for_status()
+            openapi_spec = response.text
 
-            example_dict = {"command": func.__name__, "params": {}}
-            for param_name, value in zip(sig.parameters.keys(), example_params):
-                example_dict["params"][param_name] = value
-
-            self.registry[func.__name__] = {
-                "python_sig": f"{func.__name__}{sig}",
-                "desc": desc,
-                "example_json": json.dumps(example_dict),
-                "func": func
+            self.registry[manifest["name_for_model"]] = {
+                "manifest": manifest,
+                "openapi_spec": openapi_spec
             }
 
-            return func
-
-        return decorator
-
-    def invoke(self, command_json: str) -> str:
-        try:
-            command_dict = json.loads(command_json)
-        except json.decoder.JSONDecodeError:
-            raise ValueError(f"Malformed JSON received: {repr(command_json)}")
-
-        for key in ["command", "params"]:
-            if key not in command_dict:
-                raise ValueError(
-                    f"Command JSON missing required key: {repr(key)}")
-
-        if command_dict["command"] not in self.registry:
+    def eval(self, expression: str) -> str:
+        if not expression.startswith("requests."):
             raise ValueError(
-                f"No such command: {repr(command_dict['command'])}")
+                f"Expecting a requests function call, for example requests.get()")
 
-        func = self.registry[command_dict["command"]]["func"]
-
-        return func(**command_dict["params"])
+        r = eval(expression)
+        return f"[HTTP {r.status_code}] Response body: {r.text}"
