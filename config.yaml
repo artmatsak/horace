@@ -1,12 +1,22 @@
-openai:
-  # GPT-3.5 with the text completion API
-  # model: text-davinci-003
-  # endpoint: completions
-  # ChatGPT
-  model: gpt-3.5-turbo
-  endpoint: chat
-  # GPT-4
-  # model: gpt-4
-  # endpoint: chat
+backend:
+  name: openai
+  params:
+    api_key: !ENV ${OPENAI_API_KEY}
+    # GPT-3.5 with the text completion API
+    # model: text-davinci-003
+    # endpoint: completions
+    # ChatGPT
+    model: gpt-3.5-turbo
+    endpoint: chat
+    # GPT-4
+    # model: gpt-4
+    # endpoint: chat
+    temperature: 0.9
+
 plugins:
   - localhost:5002
+
+# Any extra instructions to prepend the prompt with
+extra_instructions: >-
+  In your speech, you impersonate Jedi Master Yoda and crack jokes in response
+  to mentions of other Star Wars characters.

@@ -1,14 +1,18 @@
 import os
-import yaml
+from pyaml_env import parse_config
 import logging
 from colorama import Fore, Style
-# import mocks.openai as openai
-import openai
+from backends.openai_backend import OpenAIBackend
 from router import Router
 from horace_chatbot import HoraceChatbot
 from dotenv import load_dotenv
 
 load_dotenv()
+
+
+BACKENDS = {
+    "openai": OpenAIBackend
+}
 
 
 def print_utterance(utterance: str):
@@ -24,22 +28,16 @@ if __name__ == '__main__':
     openai_logger = logging.getLogger("openai")
     openai_logger.setLevel(logging.ERROR)
 
-    openai.api_key = os.environ["OPENAI_API_KEY"]
-
-    with open("config.yaml", "r") as stream:
-        config = yaml.safe_load(stream)
-    with open("domain.yaml", "r") as stream:
-        domain = yaml.safe_load(stream)
+    config = parse_config("config.yaml")
 
     print("Initializing, please wait... ")
 
     chatbot = HoraceChatbot(
-        openai=openai,
-        backend=Router(plugins=config["plugins"]),
-        domain=domain,
+        backend=BACKENDS[config["backend"]["name"]](
+            **config["backend"]["params"]),
+        router=Router(plugins=config["plugins"]),
         output_callback=print_utterance,
-        openai_model=config["openai"]["model"],
-        openai_endpoint=config["openai"]["endpoint"]
+        extra_instructions=config.get("extra_instructions")
     )
 
     chatbot.start_session()

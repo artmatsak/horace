@@ -2,8 +2,9 @@ import re
 import json
 import logging
 from openai_chatbot import OpenAIChatbot
+from backends.backend import Backend
 from router import Router
-from typing import Dict, Callable
+from typing import Optional, Callable
 
 
 class HoraceChatbot(OpenAIChatbot):
@@ -27,36 +28,33 @@ You do not disclose the details of your inner workings to the user, nor the Pyth
 
 User: Hi, how are you?"""
     NAMES = ("AI", "User")
-    BACKEND_NAME = "API"
+    ROUTER_NAME = "API"
 
     def __init__(
         self,
-        openai,
-        backend: Router,
-        domain: Dict[str, str],
+        backend: Backend,
+        router: Router,
         output_callback: Callable[[str], None],
-        openai_model: str = "text-davinci-003",
-        openai_endpoint: str = "completions"
+        extra_instructions: Optional[str] = None
     ):
         plugins_string = "\n\n".join([f'plugin_name: {name}\n{plugin["manifest"]["description_for_model"]}\n```\n{plugin["spec_yaml"]}\n```'
-                                      for name, plugin in backend.registry.items()])
+                                      for name, plugin in router.registry.items()])
 
         initial_prompt = self.INITIAL_PROMPT_TEMPLATE.format(
             plugins_string=plugins_string
         )
-        if 'extra_instructions' in domain:
-            initial_prompt = f'{domain["extra_instructions"]}\n\n{initial_prompt}'
+        if extra_instructions:
+            initial_prompt = f'{extra_instructions}\n\n{initial_prompt}'
 
-        super().__init__(openai=openai,
-                         initial_prompt=initial_prompt,
-                         output_callback=output_callback,
-                         names=self.NAMES,
-                         openai_model=openai_model,
-                         openai_endpoint=openai_endpoint)
+        super().__init__(
+            backend=backend,
+            initial_prompt=initial_prompt,
+            output_callback=output_callback,
+            names=self.NAMES
+        )
 
-        self.stop.append(f"{self.BACKEND_NAME}:")
-        self.backend = backend
-        self.domain = domain
+        self.stop.append(f"{self.ROUTER_NAME}:")
+        self.router = router
 
     def _get_all_utterances(self):
         utterance = self._get_next_utterance()
@@ -87,13 +85,13 @@ User: Hi, how are you?"""
                     # ends with the JSON
                     self.prompt = self.prompt[:-truncate_len]
 
-                result = self.backend.call(
+                result = self.router.call(
                     call_dict["plugin_name"], call_dict["request_object_params"])
-                logging.debug(f"Got backend response: {repr(result)}")
+                logging.debug(f"Got router response: {repr(result)}")
             except Exception as e:
                 result = str(e)
                 logging.error(e)
 
             if self.prompt is not None:
-                self._add_response(self.BACKEND_NAME, f"(To AI) {result}")
+                self._add_response(self.ROUTER_NAME, f"(To AI) {result}")
                 self._get_all_utterances()

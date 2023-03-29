@@ -1,30 +1,23 @@
 import string
 import logging
+from backends.backend import Backend
 from typing import Tuple, Callable, List
 
 
 class OpenAIChatbot():
-    ROLE_SYSTEM = "system"
-    ROLE_USER = "user"
-    ROLE_ASSISTANT = "assistant"
-
     def __init__(
         self,
-        openai,
+        backend: Backend,
         initial_prompt: str,
         output_callback: Callable[[str], None],
         names: Tuple[str, str] = ("AI", "Human"),
-        end_token: str = "END",
-        openai_model: str = "text-davinci-003",
-        openai_endpoint: str = "completions"
+        end_token: str = "END"
     ):
-        self.openai = openai
+        self.backend = backend
         self.initial_prompt = initial_prompt
         self.output_callback = output_callback
         self.names = names
         self.end_token = end_token
-        self.openai_model = openai_model
-        self.openai_endpoint = openai_endpoint
 
         self.prompt = None
         self.stop = [f"{name}:" for name in names]
@@ -63,27 +56,11 @@ class OpenAIChatbot():
     def _get_next_utterance(self) -> str:
         self.prompt += f"\n{self.names[0]}:"
 
-        openai_params = {
-            "max_tokens": 150,
-            "stop": self.stop,
-            "temperature": 0.9
-        }
-
-        if self.openai_endpoint == "completions":
-            completion = self.openai.Completion.create(
-                model=self.openai_model,
-                prompt=self.prompt,
-                **openai_params
-            )
-            utterance = completion.choices[0]["text"]
-        elif self.openai_endpoint == "chat":
-            completion = self.openai.ChatCompletion.create(
-                model=self.openai_model,
-                messages=[{"role": self.ROLE_SYSTEM, "content": self.prompt}],
-                **openai_params
-            )
-            utterance = completion['choices'][0]['message']['content']
-
+        utterance = self.backend.complete(
+            self.prompt,
+            max_tokens=150,
+            stop=self.stop
+        )
         utterance = utterance.strip(string.whitespace + '"')
         logging.debug(f"Got utterance: {repr(utterance)}")
 
