@@ -61,7 +61,7 @@ class Chatbot():
             max_tokens=150,
             stop=self.stop
         )
-        utterance = utterance.strip(string.whitespace + '"')
+        utterance = utterance.strip()
         logging.debug(f"Got utterance: {repr(utterance)}")
 
         end_token_pos = utterance.find(self.end_token)
