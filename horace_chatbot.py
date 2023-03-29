@@ -1,13 +1,13 @@
 import re
 import json
 import logging
-from openai_chatbot import OpenAIChatbot
+from openai_chatbot import Chatbot
 from backends.backend import Backend
 from router import Router
 from typing import Optional, Callable
 
 
-class HoraceChatbot(OpenAIChatbot):
+class HoraceChatbot(Chatbot):
     INITIAL_PROMPT_TEMPLATE = """You have access to the following plugin APIs, as defined by their OpenAPI specification YAML:
 
 {plugins_string}

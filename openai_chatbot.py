@@ -4,7 +4,7 @@ from backends.backend import Backend
 from typing import Tuple, Callable, List
 
 
-class OpenAIChatbot():
+class Chatbot():
     def __init__(
         self,
         backend: Backend,
