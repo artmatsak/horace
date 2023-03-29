@@ -7,7 +7,7 @@ from typing import Dict, Callable
 
 
 class HoraceChatbot(OpenAIChatbot):
-    INITIAL_PROMPT_TEMPLATE = """You have access to the following plugin APIs, as defined by their OpenAPI specifications:
+    INITIAL_PROMPT_TEMPLATE = """You have access to the following plugin APIs, as defined by their OpenAPI specification YAML:
 
 {plugins_string}
 
@@ -38,7 +38,7 @@ User: Hi, how are you?"""
         openai_model: str = "text-davinci-003",
         openai_endpoint: str = "completions"
     ):
-        plugins_string = "\n\n".join([f'plugin_name: {name}\n{plugin["manifest"]["description_for_model"]}\n```\n{plugin["openapi_spec"]}\n```'
+        plugins_string = "\n\n".join([f'plugin_name: {name}\n{plugin["manifest"]["description_for_model"]}\n```\n{plugin["spec_yaml"]}\n```'
                                       for name, plugin in backend.registry.items()])
 
         initial_prompt = self.INITIAL_PROMPT_TEMPLATE.format(

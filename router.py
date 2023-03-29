@@ -1,7 +1,12 @@
 import os
+import yaml
 import json
 import requests
 from urllib.parse import urlunsplit
+import openapi_core
+from openapi_core.contrib.requests import RequestsOpenAPIRequest
+from openapi_spec_validator.validation.exceptions import OpenAPIValidationError
+from openapi_core.validation.request.exceptions import RequestValidationError
 import logging
 from typing import List, Dict
 
@@ -45,13 +50,21 @@ class Router():
 
                 response = requests.get(manifest["api"]["url"])
                 response.raise_for_status()
-                openapi_spec = response.text
+                spec_yaml = response.text
 
                 self.registry[manifest["name_for_model"]] = {
                     "manifest": manifest,
-                    "openapi_spec": openapi_spec,
+                    "spec_yaml": spec_yaml,
                     "db_info": plugin_db_update[netloc]
                 }
+
+                spec_dict = yaml.safe_load(spec_yaml)
+                try:
+                    self.registry[manifest["name_for_model"]]["spec"] = openapi_core.Spec.create(
+                        data=spec_dict)
+                except OpenAPIValidationError as error:
+                    logging.warning(
+                        f"Invalid OpenAPI specification for plugin {netloc}. Horace will be unable to validate LLM requests to this plugin against the spec. Invalid spec may also cause the LLM to form invalid requests.")
 
             f.seek(0)
             json.dump(plugin_db_update, f)
@@ -61,6 +74,7 @@ class Router():
         if plugin_name not in self.registry:
             raise ValueError(f"Unknown plugin: {plugin_name}")
 
+        # Add authorization headers, if any
         if self.registry[plugin_name]["db_info"]["auth_type"] == self.AUTH_TYPE_USER_HTTP:
             extra_headers = {
                 'Authorization': f'Bearer {self.registry[plugin_name]["db_info"]["auth_token"]}'
@@ -71,6 +85,17 @@ class Router():
                 request_object_params["headers"] = extra_headers
 
         request = requests.Request(**request_object_params)
+
+        # Validate the request against the plugin's OpenAPI spec
+        if "spec" in self.registry[plugin_name]:
+            openapi_request = RequestsOpenAPIRequest(request)
+            try:
+                openapi_core.validate_request(
+                    openapi_request, spec=self.registry[plugin_name]["spec"])
+            except RequestValidationError as e:
+                raise ValueError(
+                    f"Error validating the request against the plugin's OpenAPI spec: {e}")
+
         prepared_request = request.prepare()
         response = requests.Session().send(prepared_request)
 
