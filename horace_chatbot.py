@@ -59,8 +59,7 @@ User: Hi, how are you?"""
     def _get_all_utterances(self):
         utterance = self._get_next_utterance()
 
-        m = re.match(r"(.*?)($|CALL (.*))", utterance,
-                     re.IGNORECASE | re.DOTALL)
+        m = re.match(r"(.*?)($|CALL (.*))", utterance, re.DOTALL)
         utterance = m[1].strip()
         command_json = m[3]
 
