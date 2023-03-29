@@ -1,7 +1,7 @@
 import re
 import json
 import logging
-from openai_chatbot import Chatbot
+from chatbot import Chatbot
 from backends.backend import Backend
 from router import Router
 from typing import Optional, Callable
