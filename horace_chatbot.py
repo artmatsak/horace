@@ -1,4 +1,5 @@
 import re
+import json
 import logging
 from openai_chatbot import OpenAIChatbot
 from router import Router
@@ -10,9 +11,14 @@ class HoraceChatbot(OpenAIChatbot):
 
 {plugins_string}
 
-You can use the APIs above in your interactions with the user. To call an API method, use the following format: EXECUTE [Python requests function call]. For example:
+You can use the APIs above in your interactions with the user. To call an API method, use the following format: CALL [JSON], where [JSON] is a JSON object with the following properties:
 
-AI: Sure, let me look into that. EXECUTE requests.post([some parameters])
+- plugin_name: The system name for the plugin as defined above
+- request_object_params: A dictionary of parameters for instantiation of the corresponding requests.Request object in Python.
+
+For example:
+
+AI: Sure, let me look into that. CALL {{"plugin_name": "[plugin_name for the plugin]", "request_object_params": {{"method": "POST", [other parameters for requests.Request()]}}}}
 API: (To AI) [HTTP 200] Response body: OK
 
 No further text can follow an API call. If you have multiple calls to make, you wait for the API response before making the next one.
@@ -32,7 +38,7 @@ User: Hi, how are you?"""
         openai_model: str = "text-davinci-003",
         openai_endpoint: str = "completions"
     ):
-        plugins_string = "\n\n".join([f'{name}: {plugin["manifest"]["description_for_model"]}\n```\n{plugin["openapi_spec"]}\n```'
+        plugins_string = "\n\n".join([f'plugin_name: {name}\n{plugin["manifest"]["description_for_model"]}\n```\n{plugin["openapi_spec"]}\n```'
                                       for name, plugin in backend.registry.items()])
 
         initial_prompt = self.INITIAL_PROMPT_TEMPLATE.format(
@@ -55,7 +61,7 @@ User: Hi, how are you?"""
     def _get_all_utterances(self):
         utterance = self._get_next_utterance()
 
-        m = re.match(r"(.*?)($|EXECUTE (.*))", utterance,
+        m = re.match(r"(.*?)($|CALL (.*))", utterance,
                      re.IGNORECASE | re.DOTALL)
         utterance = m[1].strip()
         command_json = m[3]
@@ -70,7 +76,19 @@ User: Hi, how are you?"""
             logging.debug(f"Evaluating expression: {repr(command_json)}")
 
             try:
-                result = self.backend.eval(command_json)
+                try:
+                    call_dict, ind = json.JSONDecoder().raw_decode(command_json)
+                except json.decoder.JSONDecodeError:
+                    raise ValueError(f"Malformed JSON: {repr(command_json)}")
+
+                truncate_len = len(command_json) - ind
+                if truncate_len:
+                    # Truncate the prompt so that the AI's utterance correctly
+                    # ends with the JSON
+                    self.prompt = self.prompt[:-truncate_len]
+
+                result = self.backend.call(
+                    call_dict["plugin_name"], call_dict["request_object_params"])
                 logging.debug(f"Got backend response: {repr(result)}")
             except Exception as e:
                 result = str(e)
