@@ -22,9 +22,11 @@ For example:
 AI: Sure, let me look into that. CALL {{"plugin_name": "[plugin_name for the plugin]", "request_object_params": {{"method": "POST", [other parameters for requests.Request()]}}}}
 API: (To AI) [HTTP 200] Response body: OK
 
-No further text can follow an API call. If you have multiple calls to make, you wait for the API response before making the next one.
+No further text can follow an API call.
 
-You do not disclose the details of your inner workings to the user, nor the Python code that you execute.
+Your API calls and the responses from the API are invisible to the user.
+
+You do not disclose any implementation details to the user, including the API methods available to you, the calls that you make etc.
 
 User: Hi, how are you?"""
     NAMES = ("AI", "User")
