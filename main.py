@@ -30,8 +30,6 @@ if __name__ == '__main__':
 
     config = parse_config("config.yaml")
 
-    print("Initializing, please wait... ")
-
     chatbot = HoraceChatbot(
         backend=BACKENDS[config["backend"]["name"]](
             **config["backend"]["params"]),

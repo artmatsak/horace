@@ -27,17 +27,22 @@ class Router():
         self.registry = {}
         plugin_auth_update = {}
         for netloc in set(plugins):
-            logging.debug(f"Loading plugin: {netloc}")
+            self._log_user("Loading plugins...")
 
-            manifest_url = urlunsplit(
-                ('http', netloc, '/.well-known/ai-plugin.json', '', ''))
-            response = requests.get(manifest_url)
-            response.raise_for_status()
-            manifest = json.loads(response.text)
+            try:
+                manifest_url = urlunsplit(
+                    ('http', netloc, '/.well-known/ai-plugin.json', '', ''))
+                response = requests.get(manifest_url)
+                response.raise_for_status()
+                manifest = json.loads(response.text)
+            except Exception as e:
+                self._log_user(
+                    f'Unable to load manifest for {netloc}, skipping: {e}')
+                continue
 
             if manifest["auth"]["type"] not in [self.AUTH_TYPE_NONE, self.AUTH_TYPE_SERVICE_HTTP, self.AUTH_TYPE_USER_HTTP]:
-                logging.debug(
-                    f'Plugin auth type not yet supported, skipping: {manifest["auth"]["type"]}')
+                self._log_user(
+                    f'Plugin {netloc} declares an unsupported auth type, skipping: {manifest["auth"]["type"]}')
                 continue
 
             if netloc not in plugin_auth or manifest["auth"]["type"] != plugin_auth[netloc]["type"]:
@@ -51,26 +56,40 @@ class Router():
             else:
                 plugin_auth_update[netloc] = plugin_auth[netloc].copy()
 
-            response = requests.get(manifest["api"]["url"])
-            response.raise_for_status()
-            spec_yaml = response.text
+            try:
+                response = requests.get(manifest["api"]["url"])
+                response.raise_for_status()
+                spec_yaml = response.text
+            except Exception as e:
+                self._log_user(
+                    f'Unable to fetch OpenAPI specification for {netloc}, skipping: {e}')
+                continue
 
             self.registry[manifest["name_for_model"]] = {
+                "netloc": netloc,
                 "manifest": manifest,
                 "spec_yaml": spec_yaml,
                 "auth": plugin_auth_update[netloc]
             }
 
-            spec_dict = yaml.safe_load(spec_yaml)
             try:
+                spec_dict = yaml.safe_load(spec_yaml)
                 self.registry[manifest["name_for_model"]]["spec"] = openapi_core.Spec.create(
                     data=spec_dict)
-            except OpenAPIValidationError as error:
-                logging.warning(
-                    f"Invalid OpenAPI specification for plugin {netloc}. Horace will be unable to validate LLM requests to this plugin against the spec. Invalid spec may also cause the LLM to form invalid requests.")
+            except Exception as e:
+                self._log_user(
+                    f"Warning: Invalid OpenAPI specification for {netloc}. Horace will be unable to validate LLM requests to this plugin against the spec. Invalid spec presented to LLM may also cause it to form incorrect requests.",
+                    level=logging.WARNING
+                )
 
         with open(self.PLUGIN_AUTH_FILENAME, 'w') as f:
             json.dump(plugin_auth_update, f)
+
+        if self.registry:
+            self._log_user(
+                "Plugins loaded: " + ", ".join([p["netloc"] for p in self.registry.values()]))
+        else:
+            self._log_user("No plugins loaded.")
 
     def call(self, plugin_name: str, request_object_params: Dict) -> str:
         if plugin_name not in self.registry:
@@ -106,3 +125,7 @@ class Router():
             result.append(f"response body: {response.text}")
 
         return ", ".join(result)
+
+    def _log_user(self, msg: str, level: int = logging.INFO):
+        print(msg)
+        logging.log(level, msg)
