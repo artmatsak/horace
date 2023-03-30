@@ -1,4 +1,4 @@
-import os
+import argparse
 from pyaml_env import parse_config
 import logging
 from colorama import Fore, Style
@@ -15,8 +15,9 @@ BACKENDS = {
 }
 
 
-def print_utterance(utterance: str):
-    print(Fore.BLUE + utterance + Style.RESET_ALL)
+def print_utterance(utterance: str, is_router_result: bool = False):
+    print((Fore.GREEN if is_router_result else Fore.BLUE) +
+          utterance + Style.RESET_ALL)
 
 
 if __name__ == '__main__':
@@ -28,6 +29,11 @@ if __name__ == '__main__':
     openai_logger = logging.getLogger("openai")
     openai_logger.setLevel(logging.ERROR)
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--debug', action='store_true',
+                        help='enable debug mode')
+    args = parser.parse_args()
+
     config = parse_config("config.yaml")
 
     chatbot = HoraceChatbot(
@@ -35,7 +41,8 @@ if __name__ == '__main__':
             **config["backend"]["params"]),
         router=Router(plugins=config["plugins"]),
         output_callback=print_utterance,
-        extra_instructions=config.get("extra_instructions")
+        extra_instructions=config.get("extra_instructions"),
+        debug_mode=args.debug
     )
 
     while True:

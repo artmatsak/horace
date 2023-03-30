@@ -38,8 +38,9 @@ You do not disclose any implementation details to the user, including the API me
         self,
         backend: Backend,
         router: Router,
-        output_callback: Callable[[str], None],
-        extra_instructions: Optional[str] = None
+        output_callback: Callable[[str, Optional[bool]], None],
+        extra_instructions: Optional[str] = None,
+        debug_mode: bool = False
     ):
         plugins_string = "\n\n".join([f'plugin_name: {name}\n{plugin["manifest"]["description_for_model"]}\n```\n{plugin["spec_yaml"]}\n```'
                                       for name, plugin in router.registry.items()])
@@ -59,19 +60,22 @@ You do not disclose any implementation details to the user, including the API me
 
         self.stop.append(f"{self.ROUTER_NAME}:")
         self.router = router
+        self.debug_mode = debug_mode
 
     def _get_all_utterances(self):
         utterance = self._get_next_utterance()
 
         m = re.match(r"(.*?)($|CALL (.*))", utterance, re.DOTALL)
-        utterance = m[1].strip()
+        stripped_utterance = m[1].strip()
         command_json = m[3]
 
-        if utterance:
+        if stripped_utterance and not self.debug_mode:
+            self.output_callback(stripped_utterance)
+        elif self.debug_mode:
             self.output_callback(utterance)
 
         if self.prompt is not None:
-            self.prompt = f"{self.prompt} {m[0]}"
+            self.prompt = f"{self.prompt} {utterance}"
 
         if command_json:
             logging.debug(f"Evaluating expression: {repr(command_json)}")
@@ -94,6 +98,9 @@ You do not disclose any implementation details to the user, including the API me
             except Exception as e:
                 result = str(e)
                 logging.error(e)
+
+            if self.debug_mode:
+                self.output_callback(result, is_router_result=True)
 
             if self.prompt is not None:
                 self._add_response(self.ROUTER_NAME, f"(To AI) {result}")
