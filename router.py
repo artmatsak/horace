@@ -26,7 +26,7 @@ class Router():
 
         self.registry = {}
         plugin_auth_update = {}
-        for netloc in set(plugins):
+        for netloc in list(dict.fromkeys(plugins)):
             self._log_user("Loading plugins...")
 
             try:
