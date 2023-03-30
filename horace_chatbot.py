@@ -78,7 +78,7 @@ You do not disclose any implementation details to the user, including the API me
             self.prompt = f"{self.prompt} {utterance}"
 
         if command_json:
-            logging.debug(f"Evaluating expression: {repr(command_json)}")
+            logging.debug(f"Processing API call: {repr(command_json)}")
 
             try:
                 try:
