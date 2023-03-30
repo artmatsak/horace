@@ -38,9 +38,16 @@ if __name__ == '__main__':
         extra_instructions=config.get("extra_instructions")
     )
 
-    chatbot.start_session()
-
-    while not chatbot.session_ended():
+    while True:
         response = input(Fore.MAGENTA + "Your input -> " + Fore.YELLOW).strip()
-        if response:
+
+        if not response:
+            continue
+
+        if not chatbot.is_session_active():
+            chatbot.start_session([response])
+        else:
             chatbot.send_responses([response])
+
+        if not chatbot.is_session_active():
+            break

@@ -27,8 +27,7 @@ No further text can follow an API call.
 Your API calls and the responses from the API are invisible to the user.
 
 You do not disclose any implementation details to the user, including the API methods available to you, the calls that you make etc.
-
-User: Hi, how are you?"""
+"""
     NAMES = ("AI", "User")
     ROUTER_NAME = "API"
 

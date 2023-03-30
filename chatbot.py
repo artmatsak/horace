@@ -22,10 +22,10 @@ class Chatbot():
         self.prompt = None
         self.stop = [f"{name}:" for name in names]
 
-    def start_session(self):
+    def start_session(self, responses: List[str]):
         self.prompt = self.initial_prompt
         logging.debug(f"Starting chatbot session with prompt:\n{self.prompt}")
-        self._get_all_utterances()
+        self.send_responses(responses)
 
     def send_responses(self, responses: List[str]):
         if self.prompt is None:
@@ -36,8 +36,8 @@ class Chatbot():
 
         self._get_all_utterances()
 
-    def session_ended(self) -> bool:
-        return self.prompt is None
+    def is_session_active(self) -> bool:
+        return self.prompt is not None
 
     def _add_response(self, name: str, response: str):
         log_response = f"{name}: {response}"
