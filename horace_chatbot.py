@@ -23,6 +23,7 @@ For example:
 
 AI: Sure, let me look into that. CALL {{"plugin_name": "[plugin_name for the plugin]", "request_object_params": {{"method": "POST", [other parameters for requests.Request()]}}}}
 API: (To AI) [HTTP 200] Response body: OK
+AI: All done!
 
 No further text can follow an API call.
 
