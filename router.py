@@ -14,6 +14,7 @@ from typing import List, Dict
 class Router():
     PLUGIN_AUTH_FILENAME = '.plugin_auth.json'
     AUTH_TYPE_NONE = "none"
+    AUTH_TYPE_SERVICE_HTTP = "service_http"
     AUTH_TYPE_USER_HTTP = "user_http"
 
     def __init__(self, plugins: List[str]):
@@ -34,7 +35,7 @@ class Router():
             response.raise_for_status()
             manifest = json.loads(response.text)
 
-            if manifest["auth"]["type"] not in [self.AUTH_TYPE_NONE, self.AUTH_TYPE_USER_HTTP]:
+            if manifest["auth"]["type"] not in [self.AUTH_TYPE_NONE, self.AUTH_TYPE_SERVICE_HTTP, self.AUTH_TYPE_USER_HTTP]:
                 logging.debug(
                     f'Plugin auth type not yet supported, skipping: {manifest["auth"]["type"]}')
                 continue
@@ -44,7 +45,7 @@ class Router():
                     "type": manifest["auth"]["type"]
                 }
 
-                if manifest["auth"]["type"] == self.AUTH_TYPE_USER_HTTP:
+                if manifest["auth"]["type"] in [self.AUTH_TYPE_SERVICE_HTTP, self.AUTH_TYPE_USER_HTTP]:
                     plugin_auth_update[netloc]["token"] = input(
                         f'Enter access token for {manifest["name_for_human"]}: ')
             else:
