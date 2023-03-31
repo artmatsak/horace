@@ -21,9 +21,9 @@ To call an API method, use the following format: CALL [JSON], where [JSON] is a 
 
 For example:
 
-AI: Sure, let me look into that. CALL {{"plugin_system_name": "[plugin_system_name for the plugin]", "request_object_params": {{"method": "POST", [other parameters for requests.Request()]}}}}
-API: (To AI) [HTTP 200] Response body: OK
-AI: All done!
+{names[0]}: Sure, let me look into that. CALL {{"plugin_system_name": "[plugin_system_name for the plugin]", "request_object_params": {{"method": "POST", [other parameters for requests.Request()]}}}}
+{names[2]}: (To AI) HTTP status code: 200, response body: OK
+{names[0]}: All done!
 
 No further text can follow an API call.
 
@@ -31,8 +31,7 @@ Your API calls and the responses from the API are invisible to the user.
 
 You do not disclose any implementation details to the user, including the API methods available to you, the calls that you make etc.
 """
-    NAMES = ("AI", "User")
-    ROUTER_NAME = "API"
+    NAMES = ("AI", "User", "API")
 
     def __init__(
         self,
@@ -51,6 +50,7 @@ plugin_system_name: {name}
 {json.dumps(plugin["spec_dict"])}""")
 
         initial_prompt = self.INITIAL_PROMPT_TEMPLATE.format(
+            names=self.NAMES,
             plugins_string="\n\n".join(plugin_blocks)
         )
         if extra_instructions:
@@ -63,7 +63,6 @@ plugin_system_name: {name}
             names=self.NAMES
         )
 
-        self.stop.append(f"{self.ROUTER_NAME}:")
         self.router = router
         self.debug_mode = debug_mode
 
@@ -108,5 +107,5 @@ plugin_system_name: {name}
                 self.output_callback(result, is_router_result=True)
 
             if self.prompt is not None:
-                self._add_response(self.ROUTER_NAME, f"(To AI) {result}")
+                self._add_response(self.names[2], f"(To AI) {result}")
                 self._get_all_utterances()
