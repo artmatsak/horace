@@ -58,7 +58,7 @@ class Chatbot():
 
         utterance = self.backend.complete(
             self.prompt,
-            max_tokens=150,
+            max_tokens=750,
             stop=self.stop
         )
         utterance = utterance.strip()
