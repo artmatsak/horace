@@ -13,9 +13,14 @@ from typing import List, Dict
 
 class Router():
     PLUGIN_AUTH_FILENAME = '.plugin_auth.json'
+
     AUTH_TYPE_NONE = "none"
     AUTH_TYPE_SERVICE_HTTP = "service_http"
     AUTH_TYPE_USER_HTTP = "user_http"
+
+    MIME_TYPES_JSON = ["application/json"]
+    MIME_TYPES_YAML = ["application/yaml",
+                       "application/x-yaml", "text/yaml", "text/x-yaml"]
 
     def __init__(self, plugins: List[str]):
         if os.path.isfile(self.PLUGIN_AUTH_FILENAME):
@@ -59,21 +64,39 @@ class Router():
             try:
                 response = requests.get(manifest["api"]["url"])
                 response.raise_for_status()
-                spec_yaml = response.text
             except Exception as e:
                 self._log_user(
                     f'Unable to fetch OpenAPI specification for {netloc}, skipping: {e}')
                 continue
 
+            content_type = response.headers.get('Content-Type')
+            if not content_type:
+                self._log_user(
+                    f'Unable to parse OpenAPI specification for {netloc}, skipping: No Content-Type header set')
+                continue
+
+            mime_type = content_type.split(';')[0].strip()
+            if mime_type not in self.MIME_TYPES_JSON + self.MIME_TYPES_YAML:
+                self._log_user(
+                    f'Unable to parse OpenAPI specification for {netloc}, skipping: Unsupported MIME type: {mime_type}')
+                continue
+
+            try:
+                spec_dict = json.loads(
+                    response.text) if mime_type in self.MIME_TYPES_JSON else yaml.safe_load(response.text)
+            except Exception as e:
+                self._log_user(
+                    f'Unable to parse OpenAPI specification for {netloc}, skipping: {e}')
+                continue
+
             self.registry[manifest["name_for_model"]] = {
                 "netloc": netloc,
                 "manifest": manifest,
-                "spec_yaml": spec_yaml,
+                "spec_dict": spec_dict,
                 "auth": plugin_auth_update[netloc]
             }
 
             try:
-                spec_dict = yaml.safe_load(spec_yaml)
                 self.registry[manifest["name_for_model"]]["spec"] = openapi_core.Spec.create(
                     data=spec_dict)
             except Exception as e:

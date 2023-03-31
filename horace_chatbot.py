@@ -8,7 +8,7 @@ from typing import Optional, Callable
 
 
 class HoraceChatbot(Chatbot):
-    INITIAL_PROMPT_TEMPLATE = """You have access to the following plugin APIs, as defined by their OpenAPI specification YAML:
+    INITIAL_PROMPT_TEMPLATE = """You have access to the following plugin APIs, as defined by their OpenAPI specifications:
 
 {plugins_string}
 
@@ -16,12 +16,12 @@ You can use the APIs above if you determine that you need the functionality they
 
 To call an API method, use the following format: CALL [JSON], where [JSON] is a JSON object with the following properties:
 
-- plugin_name: The system name for the plugin as defined above
+- plugin_system_name: The system name for the plugin as defined above
 - request_object_params: A dictionary of parameters for instantiation of the corresponding requests.Request object in Python.
 
 For example:
 
-AI: Sure, let me look into that. CALL {{"plugin_name": "[plugin_name for the plugin]", "request_object_params": {{"method": "POST", [other parameters for requests.Request()]}}}}
+AI: Sure, let me look into that. CALL {{"plugin_system_name": "[plugin_system_name for the plugin]", "request_object_params": {{"method": "POST", [other parameters for requests.Request()]}}}}
 API: (To AI) [HTTP 200] Response body: OK
 AI: All done!
 
@@ -42,11 +42,16 @@ You do not disclose any implementation details to the user, including the API me
         extra_instructions: Optional[str] = None,
         debug_mode: bool = False
     ):
-        plugins_string = "\n\n".join([f'plugin_name: {name}\n{plugin["manifest"]["description_for_model"]}\n```\n{plugin["spec_yaml"]}\n```'
-                                      for name, plugin in router.registry.items()])
+        plugin_blocks = []
+        for name, plugin in router.registry.items():
+            plugin_blocks.append(f"""plugin_human_name: {plugin["manifest"]["name_for_human"]}
+plugin_human_description: {plugin["manifest"]["description_for_human"]}
+plugin_system_name: {name}
+{plugin["manifest"]["description_for_model"]}
+{json.dumps(plugin["spec_dict"])}""")
 
         initial_prompt = self.INITIAL_PROMPT_TEMPLATE.format(
-            plugins_string=plugins_string
+            plugins_string="\n\n".join(plugin_blocks)
         )
         if extra_instructions:
             initial_prompt = f'{extra_instructions}\n\n{initial_prompt}'
@@ -93,7 +98,7 @@ You do not disclose any implementation details to the user, including the API me
                     self.prompt = self.prompt[:-truncate_len]
 
                 result = self.router.call(
-                    call_dict["plugin_name"], call_dict["request_object_params"])
+                    call_dict["plugin_system_name"], call_dict["request_object_params"])
                 logging.debug(f"Got router response: {repr(result)}")
             except Exception as e:
                 result = str(e)
