@@ -143,11 +143,7 @@ class Router():
         prepared_request = request.prepare()
         response = requests.Session().send(prepared_request)
 
-        result = [f"HTTP status code: {response.status_code}"]
-        if response.status_code >= 200 and response.status_code < 300:
-            result.append(f"response body: {response.text}")
-
-        return ", ".join(result)
+        return response.status_code, response.text
 
     def _log_user(self, msg: str, level: int = logging.INFO):
         print(msg)

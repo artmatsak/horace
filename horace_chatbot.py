@@ -22,7 +22,7 @@ To call an API method, use the following format: {call_opening_tag}[JSON]{call_c
 Here is an example with made-up values:
 
 {names[0]}: Sure, let me look into that. {call_opening_tag}{{"plugin_system_name": "test", "request_object_params": {{"method": "POST", "url": "https://www.example.com/api/"}}}}{call_closing_tag}
-{names[2]}: (To AI) HTTP status code: 200, response body: OK
+{names[2]}: API responded with HTTP status code 200, response body: OK
 {names[0]}: All done!
 
 No further text can follow an API call. If you have multiple calls to make, you wait for the API response before making the next one.
@@ -31,7 +31,7 @@ Your API calls and the responses from the API are invisible to the user.
 
 You do not disclose any implementation details to the user, including the API methods available to you, the calls that you make etc.
 """
-    NAMES = ("AI", "User", "API")
+    NAMES = ("AI", "User", "System")
     CALL_OPENING_TAG = "<call>"
     CALL_CLOSING_TAG = "</call>"
 
@@ -102,9 +102,15 @@ plugin_system_name: {name}
                     # ends with the JSON
                     self.prompt = self.prompt[:-truncate_len]
 
-                result = self.router.call(
+                status_code, text = self.router.call(
                     call_dict["plugin_system_name"], call_dict["request_object_params"])
-                logging.debug(f"Got router response: {repr(result)}")
+
+                logging.debug(
+                    f"Got router response: {repr((status_code, text))}")
+
+                result = f"API responded with HTTP status code {status_code}"
+                if status_code >= 200 and status_code < 300:
+                    result += f", response body: {text}"
             except Exception as e:
                 result = str(e)
                 logging.error(e)
@@ -117,5 +123,5 @@ plugin_system_name: {name}
                 self.output_callback(result, is_router_result=True)
 
             if self.prompt is not None:
-                self._add_response(self.names[2], f"(To AI) {result}")
+                self._add_response(self.names[2], result)
                 self._get_all_utterances()
