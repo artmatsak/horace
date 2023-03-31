@@ -29,11 +29,11 @@ class Router():
         else:
             plugin_auth = {}
 
+        self._log_user("Loading plugins...")
+
         self.registry = {}
         plugin_auth_update = {}
         for netloc in list(dict.fromkeys(plugins)):
-            self._log_user("Loading plugins...")
-
             try:
                 manifest_url = urlunsplit(
                     ('http', netloc, '/.well-known/ai-plugin.json', '', ''))
