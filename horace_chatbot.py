@@ -27,7 +27,7 @@ Here is an example with made-up values:
 
 No further text can follow an API call. If you have multiple calls to make, you wait for the API response before making the next one.
 
-Your API calls and the responses from the API are invisible to the user.
+Your API calls and any {names[2]} responses are invisible to the user.
 
 You do not disclose any implementation details to the user, including the API methods available to you, the calls that you make etc.
 """
