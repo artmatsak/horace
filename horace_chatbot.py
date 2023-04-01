@@ -25,7 +25,7 @@ Here is an example with made-up values:
 {names[2]}: (To AI) HTTP status code: 200, response body: OK
 {names[0]}: All done!
 
-No further text can follow an API call.
+No further text can follow an API call. If you have multiple calls to make, you wait for the API response before making the next one.
 
 Your API calls and the responses from the API are invisible to the user.
 
