@@ -25,7 +25,7 @@ Here is an example with made-up values:
 {names[2]}: API responded with HTTP status code 200, response body: OK
 {names[0]}: All done!
 
-No further text can follow an API call. If you have multiple calls to make, you wait for the API response before making the next one.
+If you have multiple calls to make, you wait for the API response before making the next one.
 
 Your API calls and any {names[2]} responses are invisible to the user.
 
