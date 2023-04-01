@@ -84,8 +84,7 @@ plugin_system_name: {name}
         elif self.debug_mode:
             self.output_callback(utterance)
 
-        if self.prompt is not None:
-            self.prompt = f"{self.prompt} {utterance}"
+        self.prompt = f"{self.prompt} {utterance}"
 
         if call_json:
             logging.debug(f"Processing API call: {repr(call_json)}")
@@ -122,6 +121,5 @@ plugin_system_name: {name}
             if self.debug_mode:
                 self.output_callback(result, is_router_result=True)
 
-            if self.prompt is not None:
-                self._add_response(self.names[2], result)
-                self._get_all_utterances()
+            self._add_response(self.names[2], result)
+            self._get_all_utterances()

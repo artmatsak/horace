@@ -1,7 +1,7 @@
 import string
 import logging
 from backends.backend import Backend
-from typing import Tuple, Callable, List
+from typing import Tuple, Callable, List, Optional
 
 
 class Chatbot():
@@ -11,7 +11,7 @@ class Chatbot():
         initial_prompt: str,
         output_callback: Callable[[str], None],
         names: Tuple[str, str] = ("AI", "Human"),
-        end_token: str = "END"
+        end_token: Optional[str] = None
     ):
         self.backend = backend
         self.initial_prompt = initial_prompt
@@ -64,10 +64,11 @@ class Chatbot():
         utterance = utterance.strip()
         logging.debug(f"Got utterance: {repr(utterance)}")
 
-        end_token_pos = utterance.find(self.end_token)
-        if end_token_pos != -1:
-            utterance = utterance[:end_token_pos].strip()
-            # Ending the session
-            self.prompt = None
+        if self.end_token:
+            end_token_pos = utterance.find(self.end_token)
+            if end_token_pos != -1:
+                utterance = utterance[:end_token_pos].strip()
+                # Ending the session
+                self.prompt = None
 
         return utterance
