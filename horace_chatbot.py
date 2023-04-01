@@ -14,14 +14,14 @@ class HoraceChatbot(Chatbot):
 
 You can use the APIs above if you determine that you need the functionality they provide. You do not proactively steer the user towards performing any actions available to you.
 
-To call an API method, use the following format: CALL [JSON], where [JSON] is a JSON object with the following properties:
+To call an API method, use the following format: {call_opening_tag}[JSON]{call_closing_tag}, where [JSON] is a JSON object with the following properties:
 
 - plugin_system_name: The system name for the plugin as defined above
 - request_object_params: A dictionary of parameters for instantiation of the corresponding requests.Request object in Python.
 
 Here is an example with made-up values:
 
-{names[0]}: Sure, let me look into that. CALL {{"plugin_system_name": "test", "request_object_params": {{"method": "POST", "url": "https://www.example.com/api/"}}}}
+{names[0]}: Sure, let me look into that. {call_opening_tag}{{"plugin_system_name": "test", "request_object_params": {{"method": "POST", "url": "https://www.example.com/api/"}}}}{call_closing_tag}
 {names[2]}: (To AI) HTTP status code: 200, response body: OK
 {names[0]}: All done!
 
@@ -32,6 +32,8 @@ Your API calls and the responses from the API are invisible to the user.
 You do not disclose any implementation details to the user, including the API methods available to you, the calls that you make etc.
 """
     NAMES = ("AI", "User", "API")
+    CALL_OPENING_TAG = "<call>"
+    CALL_CLOSING_TAG = "</call>"
 
     def __init__(
         self,
@@ -51,6 +53,8 @@ plugin_system_name: {name}
 
         initial_prompt = self.INITIAL_PROMPT_TEMPLATE.format(
             names=self.NAMES,
+            call_opening_tag=self.CALL_OPENING_TAG,
+            call_closing_tag=self.CALL_CLOSING_TAG,
             plugins_string="\n\n".join(plugin_blocks)
         )
         if extra_instructions:
@@ -65,11 +69,13 @@ plugin_system_name: {name}
 
         self.router = router
         self.debug_mode = debug_mode
+        self.stop.append(self.CALL_CLOSING_TAG)
 
     def _get_all_utterances(self):
         utterance = self._get_next_utterance()
 
-        m = re.match(r"(.*?)($|CALL (.*))", utterance, re.DOTALL)
+        m = re.match(
+            r"(.*?)($|" + re.escape(self.CALL_OPENING_TAG) + r"(.*))", utterance, re.DOTALL)
         stripped_utterance = m[1].strip()
         call_json = m[3]
 
@@ -102,6 +108,10 @@ plugin_system_name: {name}
             except Exception as e:
                 result = str(e)
                 logging.error(e)
+            finally:
+                # Add back the closing tag to the prompt - it's not generated
+                # due to self.stop
+                self.prompt += self.CALL_CLOSING_TAG
 
             if self.debug_mode:
                 self.output_callback(result, is_router_result=True)
