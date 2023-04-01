@@ -71,7 +71,7 @@ plugin_system_name: {name}
 
         m = re.match(r"(.*?)($|CALL (.*))", utterance, re.DOTALL)
         stripped_utterance = m[1].strip()
-        command_json = m[3]
+        call_json = m[3]
 
         if stripped_utterance and not self.debug_mode:
             self.output_callback(stripped_utterance)
@@ -81,16 +81,16 @@ plugin_system_name: {name}
         if self.prompt is not None:
             self.prompt = f"{self.prompt} {utterance}"
 
-        if command_json:
-            logging.debug(f"Processing API call: {repr(command_json)}")
+        if call_json:
+            logging.debug(f"Processing API call: {repr(call_json)}")
 
             try:
                 try:
-                    call_dict, ind = json.JSONDecoder().raw_decode(command_json)
+                    call_dict, ind = json.JSONDecoder().raw_decode(call_json)
                 except json.decoder.JSONDecodeError:
-                    raise ValueError(f"Malformed JSON: {repr(command_json)}")
+                    raise ValueError(f"Malformed JSON: {repr(call_json)}")
 
-                truncate_len = len(command_json) - ind
+                truncate_len = len(call_json) - ind
                 if truncate_len:
                     # Truncate the prompt so that the AI's utterance correctly
                     # ends with the JSON
