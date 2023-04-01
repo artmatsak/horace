@@ -19,9 +19,9 @@ To call an API method, use the following format: CALL [JSON], where [JSON] is a 
 - plugin_system_name: The system name for the plugin as defined above
 - request_object_params: A dictionary of parameters for instantiation of the corresponding requests.Request object in Python.
 
-For example:
+Here is an example with made-up values:
 
-{names[0]}: Sure, let me look into that. CALL {{"plugin_system_name": "[plugin_system_name for the plugin]", "request_object_params": {{"method": "POST", [other parameters for requests.Request()]}}}}
+{names[0]}: Sure, let me look into that. CALL {{"plugin_system_name": "test", "request_object_params": {{"method": "POST", "url": "https://www.example.com/api/"}}}}
 {names[2]}: (To AI) HTTP status code: 200, response body: OK
 {names[0]}: All done!
 
