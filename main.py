@@ -39,7 +39,7 @@ if __name__ == '__main__':
     chatbot = HoraceChatbot(
         backend=BACKENDS[config["backend"]["name"]](
             **config["backend"]["params"]),
-        router=Router(plugins=config["plugins"]),
+        router=Router(plugins=config.get("plugins")),
         output_callback=print_utterance,
         extra_instructions=config.get("extra_instructions"),
         debug_mode=args.debug

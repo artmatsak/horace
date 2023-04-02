@@ -29,8 +29,7 @@ If you have multiple calls to make, you wait for the API response before making 
 
 Your API calls and any {names[2]} responses are invisible to the user.
 
-You do not disclose any implementation details to the user, including the API methods available to you, the calls that you make etc.
-"""
+You do not disclose any implementation details to the user, including the API methods available to you, the calls that you make etc."""
     NAMES = ("AI", "User", "System")
     CALL_OPENING_TAG = "<call>"
     CALL_CLOSING_TAG = "</call>"
@@ -43,6 +42,10 @@ You do not disclose any implementation details to the user, including the API me
         extra_instructions: Optional[str] = None,
         debug_mode: bool = False
     ):
+        prompt_blocks = []
+        if extra_instructions:
+            prompt_blocks.append(extra_instructions)
+
         plugin_blocks = []
         for name, plugin in router.registry.items():
             plugin_blocks.append(f"""plugin_human_name: {plugin["manifest"]["name_for_human"]}
@@ -51,18 +54,17 @@ plugin_system_name: {name}
 {plugin["manifest"]["description_for_model"]}
 {json.dumps(plugin["spec_dict"])}""")
 
-        initial_prompt = self.INITIAL_PROMPT_TEMPLATE.format(
-            names=self.NAMES,
-            call_opening_tag=self.CALL_OPENING_TAG,
-            call_closing_tag=self.CALL_CLOSING_TAG,
-            plugins_string="\n\n".join(plugin_blocks)
-        )
-        if extra_instructions:
-            initial_prompt = f'{extra_instructions}\n\n{initial_prompt}'
+        if plugin_blocks:
+            prompt_blocks.append(self.INITIAL_PROMPT_TEMPLATE.format(
+                names=self.NAMES,
+                call_opening_tag=self.CALL_OPENING_TAG,
+                call_closing_tag=self.CALL_CLOSING_TAG,
+                plugins_string="\n\n".join(plugin_blocks)
+            ))
 
         super().__init__(
             backend=backend,
-            initial_prompt=initial_prompt,
+            initial_prompt="\n\n".join(prompt_blocks) + "\n",
             output_callback=output_callback,
             names=self.NAMES
         )

@@ -8,7 +8,7 @@ from openapi_core.contrib.requests import RequestsOpenAPIRequest
 from openapi_spec_validator.validation.exceptions import OpenAPIValidationError
 from openapi_core.validation.request.exceptions import RequestValidationError
 import logging
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 
 class Router():
@@ -22,7 +22,7 @@ class Router():
     MIME_TYPES_YAML = ["application/yaml",
                        "application/x-yaml", "text/yaml", "text/x-yaml"]
 
-    def __init__(self, plugins: List[str]):
+    def __init__(self, plugins: Optional[List[str]] = None):
         if os.path.isfile(self.PLUGIN_AUTH_FILENAME):
             with open(self.PLUGIN_AUTH_FILENAME, 'r') as f:
                 plugin_auth = json.load(f)
@@ -33,7 +33,7 @@ class Router():
 
         self.registry = {}
         plugin_auth_update = {}
-        for netloc in list(dict.fromkeys(plugins)):
+        for netloc in list(dict.fromkeys(plugins or [])):
             try:
                 manifest_url = urlunsplit(
                     ('http', netloc, '/.well-known/ai-plugin.json', '', ''))
