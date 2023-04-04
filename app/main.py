@@ -7,7 +7,6 @@ import logging
 from backends.openai_backend import OpenAIBackend
 from router import Router
 from horace_chatbot import HoraceChatbot
-from dotenv import load_dotenv
 from typing import Dict, Any
 
 
