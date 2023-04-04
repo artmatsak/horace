@@ -14,11 +14,10 @@ backend:
     temperature: 0.9
 
 plugins:
-  - localhost:5002
+  # - localhost:5002
+  - www.klarna.com
 
 # Any extra instructions to prepend the prompt with
-extra_instructions: >-
-  You are a helpful and polite AI assistant.
 # extra_instructions: >-
 #   In your speech, you impersonate Jedi Master Yoda and crack jokes in response
 #   to mentions of other Star Wars characters.
