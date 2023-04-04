@@ -5,39 +5,52 @@ from typing import Tuple, Callable, List, Optional
 
 
 class Chatbot():
+    STATE_LISTENING = "listening"
+    STATE_REPLYING = "replying"
+    STATE_ENDED = "ended"
+
     def __init__(
         self,
         backend: Backend,
         initial_prompt: str,
         output_callback: Callable[[str], None],
+        state_callback: Optional[Callable[[str], None]] = None,
         names: Tuple[str, str] = ("AI", "Human"),
         end_token: Optional[str] = None
     ):
         self.backend = backend
-        self.initial_prompt = initial_prompt
+        self.prompt = initial_prompt
         self.output_callback = output_callback
+        self.state_callback = state_callback
         self.names = names
         self.end_token = end_token
 
-        self.prompt = None
         self.stop = [f"{name}:" for name in names]
+        self._state = self.STATE_LISTENING
 
-    async def start_session(self, responses: List[str]):
-        self.prompt = self.initial_prompt
-        logging.debug(f"Starting chatbot session with prompt:\n{self.prompt}")
-        await self.send_responses(responses)
+        logging.debug(f"Initialized chatbot with prompt:\n{self.prompt}")
+
+    @property
+    def state(self):
+        return self._state
+
+    async def _set_state(self, value):
+        self._state = value
+
+        if self.state_callback:
+            await self.state_callback(self._state)
 
     async def send_responses(self, responses: List[str]):
-        if self.prompt is None:
-            raise RuntimeError("Chatbot session is not active")
+        if self.state != self.STATE_LISTENING:
+            raise RuntimeError(
+                f"Attempting to send responses in wrong state: {self.state}")
 
         for response in responses:
             self._add_response(self.names[1], response.strip())
 
+        await self._set_state(self.STATE_REPLYING)
         await self._get_all_utterances()
-
-    def is_session_active(self) -> bool:
-        return self.prompt is not None
+        await self._set_state(self.STATE_LISTENING)
 
     def _add_response(self, name: str, response: str):
         log_response = f"{name}: {response}"
@@ -50,8 +63,7 @@ class Chatbot():
         if utterance:
             await self.output_callback(utterance)
 
-        if self.prompt is not None:
-            self.prompt = f"{self.prompt} {utterance}"
+        self.prompt = f"{self.prompt} {utterance}"
 
     async def _get_next_utterance(self) -> str:
         self.prompt += f"\n{self.names[0]}:"
@@ -68,7 +80,6 @@ class Chatbot():
             end_token_pos = utterance.find(self.end_token)
             if end_token_pos != -1:
                 utterance = utterance[:end_token_pos].strip()
-                # Ending the session
-                self.prompt = None
+                self.state = self.STATE_ENDED
 
         return utterance

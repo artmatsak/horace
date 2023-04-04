@@ -1,3 +1,4 @@
+import json
 import asyncio
 import websockets
 from pyaml_env import parse_config
@@ -18,28 +19,29 @@ BACKENDS = {
 
 def get_handler(config: Dict[str, Any], router: Router):
     async def handler(websocket):
+        async def send_state(state: str):
+            await websocket.send(json.dumps({"type": "state", "state": state}))
+
         async def send_utterance(utterance: str, is_router_result: bool = False):
-            await websocket.send(utterance)
+            await websocket.send(json.dumps({"type": "utterance", "text": utterance}))
 
         chatbot = HoraceChatbot(
             backend=BACKENDS[config["backend"]["name"]](
                 **config["backend"]["params"]),
             router=router,
             output_callback=send_utterance,
+            state_callback=send_state,
             extra_instructions=config.get("extra_instructions"),
             debug_mode=False
         )
 
         async for message in websocket:
-            if not message:
-                continue
+            event = json.loads(message)
 
-            if not chatbot.is_session_active():
-                await chatbot.start_session([message])
-            else:
-                await chatbot.send_responses([message])
+            if event["type"] == "utterance":
+                await chatbot.send_responses([event["text"]])
 
-            if not chatbot.is_session_active():
+            if chatbot.state == chatbot.STATE_ENDED:
                 break
 
     return handler

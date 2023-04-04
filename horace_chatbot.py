@@ -39,6 +39,7 @@ You do not disclose any implementation details to the user, including the API me
         backend: Backend,
         router: Router,
         output_callback: Callable[[str, Optional[bool]], None],
+        state_callback: Optional[Callable[[str], None]] = None,
         extra_instructions: Optional[str] = None,
         debug_mode: bool = False
     ):
@@ -66,6 +67,7 @@ plugin_system_name: {name}
             backend=backend,
             initial_prompt="\n\n".join(prompt_blocks) + "\n",
             output_callback=output_callback,
+            state_callback=state_callback,
             names=self.NAMES
         )
 
