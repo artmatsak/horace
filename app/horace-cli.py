@@ -38,7 +38,7 @@ async def client(uri):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--host', help='server host name', default='localhost')
+    parser.add_argument('--host', help='server host name', default='0.0.0.0')
     parser.add_argument('--port', help='server port number', default=8001)
     args = parser.parse_args()
 

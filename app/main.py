@@ -50,8 +50,8 @@ def get_handler(config: Dict[str, Any], router: Router, debug_mode: bool = False
     return handler
 
 
-async def main(handler):
-    async with websockets.serve(handler, "", 8001):
+async def main(handler, host, port):
+    async with websockets.serve(handler, host, port):
         await asyncio.Future()  # run forever
 
 
@@ -64,6 +64,8 @@ if __name__ == "__main__":
     openai_logger.setLevel(logging.ERROR)
 
     parser = argparse.ArgumentParser()
+    parser.add_argument('--host', help='bind host name', default='0.0.0.0')
+    parser.add_argument('--port', help='bind port number', default=8001)
     parser.add_argument('--debug', action='store_true',
                         help='enable debug mode')
     args = parser.parse_args()
@@ -72,4 +74,4 @@ if __name__ == "__main__":
     router = Router(plugins=config.get("plugins"))
     handler = get_handler(config, router, args.debug)
 
-    asyncio.run(main(handler))
+    asyncio.run(main(handler, args.host, args.port))
