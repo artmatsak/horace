@@ -8,6 +8,6 @@ WORKDIR /app/
 
 ENV PYTHONPATH=/app
 
-EXPOSE 80
+EXPOSE 8001
 
 CMD ["python3", "/app/main.py"]
