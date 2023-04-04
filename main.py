@@ -10,8 +10,6 @@ from horace_chatbot import HoraceChatbot
 from dotenv import load_dotenv
 from typing import Dict, Any
 
-load_dotenv()
-
 
 BACKENDS = {
     "openai": OpenAIBackend
