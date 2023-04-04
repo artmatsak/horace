@@ -73,8 +73,8 @@ plugin_system_name: {name}
         self.debug_mode = debug_mode
         self.stop.append(self.CALL_CLOSING_TAG)
 
-    def _get_all_utterances(self):
-        utterance = self._get_next_utterance()
+    async def _get_all_utterances(self):
+        utterance = await self._get_next_utterance()
 
         m = re.match(
             r"(.*?)($|" + re.escape(self.CALL_OPENING_TAG) + r"(.*))", utterance, re.DOTALL)
@@ -82,9 +82,9 @@ plugin_system_name: {name}
         call_json = m[3]
 
         if stripped_utterance and not self.debug_mode:
-            self.output_callback(stripped_utterance)
+            await self.output_callback(stripped_utterance)
         elif self.debug_mode:
-            self.output_callback(utterance)
+            await self.output_callback(utterance)
 
         self.prompt = f"{self.prompt} {utterance}"
 
@@ -121,7 +121,7 @@ plugin_system_name: {name}
                 self.prompt += self.CALL_CLOSING_TAG
 
             if self.debug_mode:
-                self.output_callback(result, is_router_result=True)
+                await self.output_callback(result, is_router_result=True)
 
             self._add_response(self.names[2], result)
-            self._get_all_utterances()
+            await self._get_all_utterances()

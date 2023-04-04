@@ -4,7 +4,7 @@ from typing import Optional, List
 
 class Backend():
     @abc.abstractmethod
-    def complete(
+    async def complete(
         self,
         prompt: str,
         max_tokens: int = 16,

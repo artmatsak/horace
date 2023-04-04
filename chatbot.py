@@ -22,19 +22,19 @@ class Chatbot():
         self.prompt = None
         self.stop = [f"{name}:" for name in names]
 
-    def start_session(self, responses: List[str]):
+    async def start_session(self, responses: List[str]):
         self.prompt = self.initial_prompt
         logging.debug(f"Starting chatbot session with prompt:\n{self.prompt}")
-        self.send_responses(responses)
+        await self.send_responses(responses)
 
-    def send_responses(self, responses: List[str]):
+    async def send_responses(self, responses: List[str]):
         if self.prompt is None:
             raise RuntimeError("Chatbot session is not active")
 
         for response in responses:
             self._add_response(self.names[1], response.strip())
 
-        self._get_all_utterances()
+        await self._get_all_utterances()
 
     def is_session_active(self) -> bool:
         return self.prompt is not None
@@ -44,19 +44,19 @@ class Chatbot():
         logging.debug(f"Adding response: {repr(log_response)}")
         self.prompt += f"\n{name}: {response}"
 
-    def _get_all_utterances(self):
-        utterance = self._get_next_utterance()
+    async def _get_all_utterances(self):
+        utterance = await self._get_next_utterance()
 
         if utterance:
-            self.output_callback(utterance)
+            await self.output_callback(utterance)
 
         if self.prompt is not None:
             self.prompt = f"{self.prompt} {utterance}"
 
-    def _get_next_utterance(self) -> str:
+    async def _get_next_utterance(self) -> str:
         self.prompt += f"\n{self.names[0]}:"
 
-        utterance = self.backend.complete(
+        utterance = await self.backend.complete(
             self.prompt,
             max_tokens=750,
             stop=self.stop

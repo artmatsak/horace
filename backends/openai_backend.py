@@ -20,7 +20,7 @@ class OpenAIBackend(Backend):
         self.endpoint = endpoint
         self.temperature = temperature
 
-    def complete(
+    async def complete(
         self,
         prompt: str,
         max_tokens: int = 16,
@@ -33,14 +33,14 @@ class OpenAIBackend(Backend):
         }
 
         if self.endpoint == "completions":
-            completion = openai.Completion.create(
+            completion = await openai.Completion.acreate(
                 model=self.model,
                 prompt=prompt,
                 **openai_params
             )
             completion = completion.choices[0]["text"]
         elif self.endpoint == "chat":
-            completion = openai.ChatCompletion.create(
+            completion = await openai.ChatCompletion.acreate(
                 model=self.model,
                 messages=[{"role": self.ROLE_SYSTEM, "content": prompt}],
                 **openai_params
