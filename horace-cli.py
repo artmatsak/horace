@@ -1,7 +1,8 @@
-# import argparse
+import argparse
 import json
 import asyncio
 import websockets
+from urllib.parse import urlunsplit
 from aioconsole import ainput
 from colorama import Fore, Style
 
@@ -32,4 +33,10 @@ async def client(uri):
 
 
 if __name__ == '__main__':
-    asyncio.run(client("ws://localhost:8001/"))
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--host', help='server host name', default='localhost')
+    parser.add_argument('--port', help='server port number', default=8001)
+    args = parser.parse_args()
+
+    url = urlunsplit(('ws', f'{args.host}:{args.port}', '/', '', ''))
+    asyncio.run(client(url))
