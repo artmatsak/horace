@@ -5,7 +5,6 @@ import requests
 from urllib.parse import urlunsplit
 import openapi_core
 from openapi_core.contrib.requests import RequestsOpenAPIRequest
-from openapi_spec_validator.validation.exceptions import OpenAPIValidationError
 from openapi_core.validation.request.exceptions import RequestValidationError
 import logging
 from typing import List, Dict, Optional
