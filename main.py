@@ -1,3 +1,4 @@
+import argparse
 import json
 import asyncio
 import websockets
@@ -17,13 +18,14 @@ BACKENDS = {
 }
 
 
-def get_handler(config: Dict[str, Any], router: Router):
+def get_handler(config: Dict[str, Any], router: Router, debug_mode: bool = False):
     async def handler(websocket):
         async def send_state(state: str):
             await websocket.send(json.dumps({"type": "state", "state": state}))
 
-        async def send_utterance(utterance: str, is_router_result: bool = False):
-            await websocket.send(json.dumps({"type": "utterance", "text": utterance}))
+        async def send_utterance(utterance: str, is_system: bool = False):
+            source = "system" if is_system else "ai"
+            await websocket.send(json.dumps({"type": "utterance", "source": source, "text": utterance}))
 
         chatbot = HoraceChatbot(
             backend=BACKENDS[config["backend"]["name"]](
@@ -32,7 +34,7 @@ def get_handler(config: Dict[str, Any], router: Router):
             utterance_coroutine=send_utterance,
             state_coroutine=send_state,
             extra_instructions=config.get("extra_instructions"),
-            debug_mode=False
+            debug_mode=debug_mode
         )
 
         async for message in websocket:
@@ -60,8 +62,13 @@ if __name__ == "__main__":
     openai_logger = logging.getLogger("openai")
     openai_logger.setLevel(logging.ERROR)
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--debug', action='store_true',
+                        help='enable debug mode')
+    args = parser.parse_args()
+
     config = parse_config("config.yaml")
     router = Router(plugins=config.get("plugins"))
-    handler = get_handler(config, router)
+    handler = get_handler(config, router, args.debug)
 
     asyncio.run(main(handler))

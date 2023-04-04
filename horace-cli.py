@@ -28,9 +28,8 @@ async def client(uri):
                     elif event["state"] == STATE_ENDED:
                         return
                 elif event["type"] == "utterance":
-                    # print((Fore.GREEN if is_router_result else Fore.BLUE) +
-                    #       utterance + Style.RESET_ALL)
-                    print(Fore.BLUE + event["text"] + Style.RESET_ALL)
+                    print((Fore.GREEN if event["source"] == "system" else Fore.BLUE) +
+                          event["text"] + Style.RESET_ALL)
 
 
 if __name__ == '__main__':

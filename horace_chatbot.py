@@ -123,7 +123,7 @@ plugin_system_name: {name}
                 self.prompt += self.CALL_CLOSING_TAG
 
             if self.debug_mode:
-                await self.utterance_coroutine(result, is_router_result=True)
+                await self.utterance_coroutine(result, is_system=True)
 
             self._add_response(self.names[2], result)
             await self._get_all_utterances()
