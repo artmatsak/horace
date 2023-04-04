@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="chat_widget.css">
     <style>
         body, html {
             margin: 0;
@@ -17,8 +18,10 @@
         <div id="chat-header">
             <h3>Chatbot</h3>
         </div>
-        <div id="chat-messages">
+        <div id="chat-messages-container">
+            <div id="chat-messages">
             <!-- Chat messages will be appended here -->
+            </div>
         </div>
         <form id="chat-form">
             <input type="text" id="chat-input" placeholder="Type your message here...">
