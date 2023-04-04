@@ -2,6 +2,7 @@
 import json
 import asyncio
 import websockets
+from aioconsole import ainput
 from colorama import Fore, Style
 
 
@@ -13,10 +14,8 @@ STATE_ENDED = "ended"
 async def client(uri):
     async with websockets.connect(uri) as websocket:
         while True:
-            utterance = input(
-                Fore.MAGENTA + "Your input -> " + Fore.YELLOW).strip()
-
-            await websocket.send(json.dumps({"type": "utterance", "text": utterance}))
+            utterance = await ainput(Fore.MAGENTA + "Your input -> " + Fore.YELLOW)
+            await websocket.send(json.dumps({"type": "utterance", "text": utterance.strip()}))
 
             while True:
                 message = await websocket.recv()
