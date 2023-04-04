@@ -1,7 +1,7 @@
 import string
 import logging
 from backends.backend import Backend
-from typing import Tuple, Callable, List, Optional
+from typing import Tuple, Callable, Coroutine, List, Optional
 
 
 class Chatbot():
@@ -13,15 +13,15 @@ class Chatbot():
         self,
         backend: Backend,
         initial_prompt: str,
-        output_callback: Callable[[str], None],
-        state_callback: Optional[Callable[[str], None]] = None,
+        utterance_coroutine: Callable[[str], Coroutine],
+        state_coroutine: Optional[Callable[[str], Coroutine]] = None,
         names: Tuple[str, str] = ("AI", "Human"),
         end_token: Optional[str] = None
     ):
         self.backend = backend
         self.prompt = initial_prompt
-        self.output_callback = output_callback
-        self.state_callback = state_callback
+        self.utterance_coroutine = utterance_coroutine
+        self.state_coroutine = state_coroutine
         self.names = names
         self.end_token = end_token
 
@@ -37,8 +37,8 @@ class Chatbot():
     async def _set_state(self, value):
         self._state = value
 
-        if self.state_callback:
-            await self.state_callback(self._state)
+        if self.state_coroutine:
+            await self.state_coroutine(self._state)
 
     async def send_responses(self, responses: List[str]):
         if self.state != self.STATE_LISTENING:
@@ -61,7 +61,7 @@ class Chatbot():
         utterance = await self._get_next_utterance()
 
         if utterance:
-            await self.output_callback(utterance)
+            await self.utterance_coroutine(utterance)
 
         self.prompt = f"{self.prompt} {utterance}"
 

@@ -29,8 +29,8 @@ def get_handler(config: Dict[str, Any], router: Router):
             backend=BACKENDS[config["backend"]["name"]](
                 **config["backend"]["params"]),
             router=router,
-            output_callback=send_utterance,
-            state_callback=send_state,
+            utterance_coroutine=send_utterance,
+            state_coroutine=send_state,
             extra_instructions=config.get("extra_instructions"),
             debug_mode=False
         )

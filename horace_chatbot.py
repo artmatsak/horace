@@ -4,7 +4,7 @@ import logging
 from chatbot import Chatbot
 from backends.backend import Backend
 from router import Router
-from typing import Optional, Callable
+from typing import Optional, Callable, Coroutine
 
 
 class HoraceChatbot(Chatbot):
@@ -38,8 +38,8 @@ You do not disclose any implementation details to the user, including the API me
         self,
         backend: Backend,
         router: Router,
-        output_callback: Callable[[str, Optional[bool]], None],
-        state_callback: Optional[Callable[[str], None]] = None,
+        utterance_coroutine: Callable[[str, Optional[bool]], Coroutine],
+        state_coroutine: Optional[Callable[[str], Coroutine]] = None,
         extra_instructions: Optional[str] = None,
         debug_mode: bool = False
     ):
@@ -66,8 +66,8 @@ plugin_system_name: {name}
         super().__init__(
             backend=backend,
             initial_prompt="\n\n".join(prompt_blocks) + "\n",
-            output_callback=output_callback,
-            state_callback=state_callback,
+            utterance_coroutine=utterance_coroutine,
+            state_coroutine=state_coroutine,
             names=self.NAMES
         )
 
@@ -84,9 +84,9 @@ plugin_system_name: {name}
         call_json = m[3]
 
         if stripped_utterance and not self.debug_mode:
-            await self.output_callback(stripped_utterance)
+            await self.utterance_coroutine(stripped_utterance)
         elif self.debug_mode:
-            await self.output_callback(utterance)
+            await self.utterance_coroutine(utterance)
 
         self.prompt = f"{self.prompt} {utterance}"
 
@@ -123,7 +123,7 @@ plugin_system_name: {name}
                 self.prompt += self.CALL_CLOSING_TAG
 
             if self.debug_mode:
-                await self.output_callback(result, is_router_result=True)
+                await self.utterance_coroutine(result, is_router_result=True)
 
             self._add_response(self.names[2], result)
             await self._get_all_utterances()

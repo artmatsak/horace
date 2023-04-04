@@ -97,7 +97,7 @@ def _run_session(customer_prompt: str):
         openai=openai,
         backend=backend.backend,
         domain=domain,
-        output_callback=lambda u: ai_utterances.append(u),
+        utterance_coroutine=lambda u: ai_utterances.append(u),
         openai_model=config["openai"]["model"],
         openai_endpoint=config["openai"]["endpoint"]
     )
@@ -111,7 +111,7 @@ def _run_session(customer_prompt: str):
     customer_chatbot = OpenAIChatbot(
         openai=openai,
         initial_prompt=customer_prompt,
-        output_callback=lambda u: customer_utterances.append(u),
+        utterance_coroutine=lambda u: customer_utterances.append(u),
         names=("Customer", "AI"),
         openai_model=config["openai"]["model"],
         openai_endpoint=config["openai"]["endpoint"]
