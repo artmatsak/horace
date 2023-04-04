@@ -38,10 +38,14 @@ def get_handler(config: Dict[str, Any], router: Router, debug_mode: bool = False
         )
 
         async for message in websocket:
-            event = json.loads(message)
+            try:
+                event = json.loads(message)
 
-            if event["type"] == "utterance":
-                await chatbot.send_responses([event["text"]])
+                if event["type"] == "utterance":
+                    await chatbot.send_responses([event["text"]])
+            except Exception as e:
+                message = f'{type(e).__name__}: {e}'
+                await websocket.send(json.dumps({"type": "error", "message": message}))
 
             if chatbot.state == chatbot.STATE_ENDED:
                 break

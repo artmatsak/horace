@@ -30,6 +30,10 @@ async def client(uri):
                 elif event["type"] == "utterance":
                     print((Fore.GREEN if event["source"] == "system" else Fore.BLUE) +
                           event["text"] + Style.RESET_ALL)
+                elif event["type"] == "error":
+                    print(Fore.CYAN +
+                          f'Server error: {event["message"]}' + Style.RESET_ALL)
+                    break
 
 
 if __name__ == '__main__':
