@@ -3,7 +3,7 @@ import json
 import asyncio
 import websockets
 from urllib.parse import urlunsplit
-from aioconsole import ainput
+from aioconsole import ainput, aprint
 from colorama import Fore, Style
 
 
@@ -28,11 +28,11 @@ async def client(uri):
                     elif event["state"] == STATE_ENDED:
                         return
                 elif event["type"] == "utterance":
-                    print((Fore.GREEN if event["source"] == "system" else Fore.BLUE) +
-                          event["text"] + Style.RESET_ALL)
+                    await aprint((Fore.GREEN if event["source"] == "system" else Fore.BLUE) +
+                                 event["text"] + Style.RESET_ALL)
                 elif event["type"] == "error":
-                    print(Fore.CYAN +
-                          f'Server error: {event["message"]}' + Style.RESET_ALL)
+                    await aprint(Fore.CYAN +
+                                 f'Server error: {event["message"]}' + Style.RESET_ALL)
                     break
 
 
