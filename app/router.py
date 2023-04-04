@@ -28,7 +28,7 @@ class Router():
         else:
             plugin_auth = {}
 
-        self._log_user("Loading plugins...")
+        logging.info("Loading plugins...")
 
         self.registry = {}
         plugin_auth_update = {}
@@ -40,12 +40,12 @@ class Router():
                 response.raise_for_status()
                 manifest = json.loads(response.text)
             except Exception as e:
-                self._log_user(
+                logging.info(
                     f'Unable to load manifest for {netloc}, skipping: {e}')
                 continue
 
             if manifest["auth"]["type"] not in [self.AUTH_TYPE_NONE, self.AUTH_TYPE_SERVICE_HTTP, self.AUTH_TYPE_USER_HTTP]:
-                self._log_user(
+                logging.info(
                     f'Plugin {netloc} declares an unsupported auth type, skipping: {manifest["auth"]["type"]}')
                 continue
 
@@ -64,19 +64,19 @@ class Router():
                 response = requests.get(manifest["api"]["url"])
                 response.raise_for_status()
             except Exception as e:
-                self._log_user(
+                logging.info(
                     f'Unable to fetch OpenAPI specification for {netloc}, skipping: {e}')
                 continue
 
             content_type = response.headers.get('Content-Type')
             if not content_type:
-                self._log_user(
+                logging.info(
                     f'Unable to parse OpenAPI specification for {netloc}, skipping: No Content-Type header set')
                 continue
 
             mime_type = content_type.split(';')[0].strip()
             if mime_type not in self.MIME_TYPES_JSON + self.MIME_TYPES_YAML:
-                self._log_user(
+                logging.info(
                     f'Unable to parse OpenAPI specification for {netloc}, skipping: Unsupported MIME type: {mime_type}')
                 continue
 
@@ -84,7 +84,7 @@ class Router():
                 spec_dict = json.loads(
                     response.text) if mime_type in self.MIME_TYPES_JSON else yaml.safe_load(response.text)
             except Exception as e:
-                self._log_user(
+                logging.info(
                     f'Unable to parse OpenAPI specification for {netloc}, skipping: {e}')
                 continue
 
@@ -99,19 +99,17 @@ class Router():
                 self.registry[manifest["name_for_model"]]["spec"] = openapi_core.Spec.create(
                     data=spec_dict)
             except Exception as e:
-                self._log_user(
-                    f"Warning: Invalid OpenAPI specification for {netloc}. Horace will be unable to validate LLM requests to this plugin against the spec. Invalid spec presented to LLM may also cause it to form incorrect requests.",
-                    level=logging.WARNING
-                )
+                logging.warn(
+                    f"Warning: Invalid OpenAPI specification for {netloc}. Horace will be unable to validate LLM requests to this plugin against the spec. Invalid spec presented to LLM may also cause it to form incorrect requests.")
 
         with open(self.PLUGIN_AUTH_FILENAME, 'w') as f:
             json.dump(plugin_auth_update, f)
 
         if self.registry:
-            self._log_user(
-                "Plugins loaded: " + ", ".join([p["netloc"] for p in self.registry.values()]))
+            logging.info("Plugins loaded: " +
+                         ", ".join([p["netloc"] for p in self.registry.values()]))
         else:
-            self._log_user("No plugins loaded.")
+            logging.info("No plugins loaded.")
 
     def call(self, plugin_name: str, request_object_params: Dict) -> str:
         if plugin_name not in self.registry:
@@ -143,7 +141,3 @@ class Router():
         response = requests.Session().send(prepared_request)
 
         return response.status_code, response.text
-
-    def _log_user(self, msg: str, level: int = logging.INFO):
-        print(msg)
-        logging.log(level, msg)
