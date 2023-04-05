@@ -15,6 +15,7 @@ backend:
 
 router:
   plugins:
+    # For https://github.com/artmatsak/chatgpt-todo-plugin/
     # - localhost:5002
     - www.klarna.com
 
