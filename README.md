@@ -139,7 +139,7 @@ horace:
   #   to mentions of other Star Wars characters.
 ```
 
-Try uncommenting the Yoda block above to see how the voice of the chatbot changes accordingly.
+Try uncommenting the Yoda block above to see how the voice of the chatbot changes accordingly. (Don't forget to restart the server after making any changes to the config.)
 
 ## Running Tests
 
