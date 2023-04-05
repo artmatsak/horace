@@ -17,6 +17,10 @@ Features:
 
 Horace builds upon and extends [GRACE](https://github.com/artmatsak/grace), my original LLM-powered chatbot. Here is Horace running in debug mode with the Klarna ChatGPT plugin, accessed via a web client:
 
+<div align="center">
+  <video src="https://user-images.githubusercontent.com/5328078/230124595-203b4316-e5f8-4d6b-b0b8-b3d0d6609756.mp4" />
+</div>
+
 ## Quick Start
 
 1. Install Python 3.10, if not already installed.
