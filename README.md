@@ -1,106 +1,143 @@
-# GRACE: GPT Reprogrammable Assistant with Code Execution
+# Horace: LLM Chatbot Server with ChatGPT Plugins
 
 **Important:** The war in Ukraine is still ongoing. Every day, Russian soldiers rape, murder, torture and deport Ukrainian civilians. Visit [this page](https://war.ukraine.ua/support-ukraine/) to see how you can support Ukraine today.
 
-GRACE leverages the OpenAI API to implement a human-like chatbot that's capable of retrieving information from a knowledge base and processing the customers' requests via an API backend. It showcases how large language models can be made to interact with external systems for knowledge retrieval and performing actions in the real world. Learn more in the [announcement blog post](https://artmatsak.com/post/grace/).
+Horace lets you implement a custom chatbot with your choice of an LLM and a set of ChatGPT plugins. It runs as a WebSocket server, allowing you to easily add an LLM-powered chatbot to your web or mobile app.
 
-**Update March 28, 2023:** Added support for GPT-4 in addition to ChatGPT and the default `text-davinci-003` model.
+Features:
 
-The default configuration implements an AI assistant for Death Star, an imaginary Star Wars-themed restaurant in Cupertino, CA. The assistant is instructed to impersonate Jedi Master Yoda.
+* WebSocket chatbot server
+* Docker-friendly
+* Sample web and CLI clients provided
+* Pluggable LLM backends (currently OpenAI API with GPT-3.5/ChatGPT/GPT-4)
+* Out-of-the-box support for ChatGPT plugins
+* ChatGPT plugin auth methods supported: `none`, `user_http`, `service_http`
+* Request validation for the plugins according to their OpenAPI specifications
+* Prompt customization for fine-grained instructions.
 
-Example interaction:
+Horace builds upon and extends [GRACE](https://github.com/artmatsak/grace), my original LLM-powered chatbot. Here is Horace running in debug mode with the Klarna ChatGPT plugin, accessed via a web client:
 
+## Quick Start
+
+1. Install Python 3.10, if not already installed.
+2. Clone this repository.
+3. Navigate to the cloned repository directory: `cd horace`
+4. Create a new virtual environment: `python3 -m venv ./venv`
+5. Activate the virtual environment: `source ./venv/bin/activate`
+6. Install project requirements: `pip3 install -r requirements.txt`
+7. Navigate to the `app` directory: `cd app`
+8. Start the server: `OPENAI_API_KEY=openai-api-key python3 main.py` (replace `openai-api-key` with your OpenAI API key - get it [here](https://beta.openai.com/signup))
+9. Launch a client:
+  * For the CLI client, run this in another terminal window:
 ```
-AI: Greetings, young Padawan! What can I do for you?
-Customer: Hi Yoda, may the Force be with you! Is Darth Vader around?
-AI: Not today, youngling. Would you like me to help you with something else?
-Customer: Yes, what can you do?
-AI: Of course, what is it that you seek? I can help you with making a reservation, changing an existing one, or canceling it. What can I do for you?
-Customer: Do you have a table for 3 people tomorrow?
-AI: Absolutely! What time would you like for the reservation?
-Customer: 4:15 pm
-AI: Good news, youngling - the table is available. Would you like to book it?
-Customer: Yes sir!
-AI: Very well, what is your full name?
-Customer: Why do you need the name?
-AI: I need your full name for the booking, to make sure that you are the rightful owner.
-Customer: Ah, OK. It's Jeremy Biggs.
-AI: The booking is confirmed and your reference is 7APZN6. Is there anything else I can do for you?
-Customer: Just had a question, what's the parking situation at the restaurant?
-AI: Excellent! Free parking is available on site and you can also park on the street (charges may apply). Is there anything else I can do for you?
-Customer: Nope, that's it, thanks.
-AI: It's been an honor serving you. May the Force be with you!
-```
-
-Unlike the GPT-3 and ChatGPT demos you might have seen so far, this is not just fantasy chitchat on the part of the bot. The bot actually executes backend commands to check table availability and make the booking, as well as to answer the customer's question about the parking. It also interprets the execution results and retranslates them to the customer.
-
-## Installation
-
-Clone this repository and `cd` to it:
-
-```
-cd grace
-```
-
-Create a Python virtual environment:
-
-```
-python3 -m venv ./venv
-```
-
-Activate the environment:
-
-```
+cd horace
 source ./venv/bin/activate
+python3 app/horace-cli.py
+```
+  * For the web client, double-click `client-demo/index.html` in Explorer/Finder etc. to open it in your browser.
+
+## Running via Docker
+
+1. Clone this repository.
+2. Navigate to the cloned repository directory: `cd horace`
+3. Build the Docker image: `docker build -t horace:latest .`
+4. Start the server:
+```
+docker run --rm \
+  -e OPENAI_API_KEY=openai-api-key \
+  -p 8001:8001 \
+  --name horace \
+  horace:latest
+```
+5. Launch a client:
+  * For the CLI client, run this in another terminal window: `docker exec -it horace python3 /app/horace-cli.py`
+  * For the web client, double-click `client-demo/index.html` in Explorer/Finder etc. to open it in your browser.
+
+## Command-Line Arguments
+
+`main.py` and `horace-cli.py` support a few command-line arguments:
+
+```
+python3 main.py --help
+usage: main.py [-h] [--host HOST] [--port PORT] [--debug]
+
+optional arguments:
+  -h, --help   show this help message and exit
+  --host HOST  bind host name
+  --port PORT  bind port number
+  --debug      enable debug mode
+```
+```
+python3 app/horace-cli.py --help
+usage: horace-cli.py [-h] [--host HOST] [--port PORT]
+
+optional arguments:
+  -h, --help   show this help message and exit
+  --host HOST  server host name
+  --port PORT  server port number
 ```
 
-Install the required packages:
+## Working with the LLM Backends
+
+At the moment, only the OpenAI API backend is supported. (I am not aware of non-OpenAI LLMs with a level of instruction-following sufficient for plugin invocation right now.) However, adding a custom LLM backend with Horace is quite straightforward:
+
+1. Inherit a new backend class from the `Backend` base located in `backends/backend.py` and implement the `complete()` method
+2. Place the new class module in the `backends` directory
+3. Add an import of the new module to `main.py`
+4. Adjust the `BACKENDS` mapping in `main.py` to include your new backend's alias and class name
+5. Switch to the new backend in `config.yaml`:
 
 ```
-pip3 install -r requirements.txt
+backend:
+  name: my_llm_backend
 ```
 
-Copy `.env.example` to `.env`:
+Refer to the OpenAI API backend (`backends/openai_backend.py`) as an example.
+
+### Model Switching with the OpenAI API Backend
+
+The OpenAI API backend lets you switch between the following models:
+
+* ChatGPT (default): The cheapest model, works reasonably well.
+* GPT-3.5 (`text-davinci-003`): 10x more expensive than ChatGPT but could work a bit better.
+* GPT-4: The most expensive but also the most powerful of them all.
+
+See `config.yaml` for switching between the various OpenAI API models.
+
+## Using ChatGPT Plugins
+
+Horace works with ChatGPT plugins out of the box. To enable a plugin, add its hostname with an optional port number to the `plugins` section in `config.yaml`:
 
 ```
-cp .env.example .env
+router:
+  plugins:
+    # For https://github.com/artmatsak/chatgpt-todo-plugin/
+    # - localhost:5002
+    - www.klarna.com
 ```
 
-Edit `.env` to set your OpenAI API key. You can obtain the key by signing up for OpenAI API [here](https://beta.openai.com/signup).
+Upon starting, the server requests `http://[hostname]/.well-known/ai-plugin.json` for each plugin and takes it from there to load them.
+
+Horace currently supports the `none`, `user_http` and `server_http` auth methods for ChatGPT plugins. If an auth token is required for a plugin, Horace asks you for one during server startup. At the moment, auth tokens are saved unencrypted in `.plugin_auth.json`.
+
+## Providing Extra Prompt Instructions
+
+The default LLM prompt for Horace is designed to make the bot neutral. The bot is neither limited to plugin-facilitated user requests (like a restaurant booking bot would be, for example), nor does is proactively push the plugin-enabled functionality onto the user. In other words, you can chat to the bot like you normally would with ChatGPT; if the bot feels that invoking a plugin method is needed, it will do so.
+
+In real-world scenarios, you may want to limit the bot to a particular scope like booking a table (see [GRACE's prompt](https://github.com/artmatsak/grace/blob/master/grace_chatbot.py#L11) for inspiration), or perhaps provide it with a unique voice/personality. To do this, you can add instructions to the LLM prompt using the `extra_instructions` property in `config.yaml`:
 
 ```
-OPENAI_API_KEY=sk-...
+horace:
+  # Any extra instructions to prepend the prompt with
+  extra_instructions: >-
+    You are a helpful and polite AI assistant.
+  # extra_instructions: >-
+  #   In your speech, you impersonate Jedi Master Yoda and crack jokes in response
+  #   to mentions of other Star Wars characters.
 ```
 
-## Running the Chatbot
-
-Run the command below to start your interactive chat session. On the first run, the chatbot will download a semantic search model from Hugging Face Hub. This may take some time.
-
-```
-python3 main.py
-```
-
-The default assistant, impersonating Yoda, can help you manage a table reservation as well as answer questions about the imaginary restaurant it works for (try asking it about gluten-free menu options, for example). Feel free to throw curveballs at it!
+Try uncommenting the Yoda block above to see how the voice of the chatbot changes accordingly.
 
 ## Running Tests
 
-A couple of tests are implemented for illustration purposes. The tests employ another chatbot instance to play the role of the human counterpart to GRACE. Use this command to run them:
-
-```
-pytest -s
-```
-
-## Model Selection
-
-In addition to the default `text-davinci-003` model, GRACE can also work with ChatGPT and GPT-4. See `config.yaml` for the details and example settings.
-
-GPT-4 is the best, but also the most expensive. The default `text-davinci-003` is cheaper but still produces excellent results. ChatGPT is the cheapest but may suffer from a number of issues (hallucinations, failure to execute commands etc.)
-
-## Chatbot Customization
-
-To adapt the bot for your use case, take a look at `backend.py` and `domain.yaml`.
-
-* `backend.py` implements the Python API that defines the types of customer requests that the bot can process, such as booking a table.
-* `domain.yaml` provides basic business information, adds any extra instructions for the chatbot, as well as includes the FAQ/knowledge base with answers to questions about your business.
-
-Check out the code and comments in those two files to see how you can customize the chatbot.
+Tests have not yet been updated since forking from GRACE. To be fixed.
