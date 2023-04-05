@@ -3,6 +3,7 @@ const socket = new WebSocket("ws://localhost:8001");
 const chatMessages = document.getElementById("chat-messages");
 const chatForm = document.getElementById("chat-form");
 const chatInput = document.getElementById("chat-input");
+const chatSend = document.getElementById("chat-send");
 
 socket.addEventListener("open", (event) => {
   console.log("WebSocket connection opened:", event);
@@ -15,7 +16,7 @@ socket.addEventListener("message", (event) => {
 
 socket.addEventListener("error", (event) => {
   console.error("WebSocket error:", event);
-  displayError("An error has occurred");
+  displayError("Error connecting to chat server");
 });
 
 socket.addEventListener("close", (event) => {
@@ -34,13 +35,33 @@ function handleMessage(data) {
       displayMessage(data.source, data.text);
       break;
     case "state":
-      // Handle state changes if needed
+      handleState(data.state); // Add this line
       break;
     case "error":
       displayError(data.message);
       break;
     default:
       console.warn("Unhandled message type:", data.type);
+  }
+}
+
+function handleState(state) { // Add this function
+  switch (state) {
+    case "replying":
+      chatInput.disabled = true;
+      chatSend.disabled = true;
+      break;
+    case "listening":
+      chatInput.disabled = false;
+      chatSend.disabled = false;
+      break;
+    case "ended":
+      chatInput.disabled = true;
+      chatSend.disabled = true;
+      socket.close();
+      break;
+    default:
+      console.warn("Unhandled state:", state);
   }
 }
 
