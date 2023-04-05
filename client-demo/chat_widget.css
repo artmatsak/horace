@@ -68,12 +68,19 @@ body {
   margin-left: 50px;
 }
 
-.ai-message {
-  background-color: #e8e8e8;
+.ai-message, .system-message {
   color: #333;
   align-self: flex-start;
   margin-right: 50px;
+}
+
+.ai-message {
+  background-color: #e8e8e8;
   white-space: pre-wrap;
+}
+
+.system-message {
+  background-color: limegreen;
 }
 
 /* Chat Form */

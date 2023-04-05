@@ -81,7 +81,13 @@ function sendMessage(text) {
 function displayMessage(source, text) {
   const chatBubble = document.createElement("div");
   chatBubble.classList.add("chat-bubble");
-  chatBubble.classList.add(source === "ai" ? "ai-message" : "user-message");
+  chatBubble.classList.add(
+    source === "ai"
+      ? "ai-message"
+      : source === "user"
+      ? "user-message"
+      : "system-message"
+  );
   chatBubble.innerHTML = text.replace(/\n/g, "<br>"); // Replace new lines with <br> tags
   chatMessages.appendChild(chatBubble);
   chatMessages.scrollTop = chatMessages.scrollHeight;
