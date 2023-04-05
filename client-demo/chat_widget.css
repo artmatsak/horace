@@ -72,6 +72,7 @@ body {
   color: #333;
   align-self: flex-start;
   margin-right: 50px;
+  word-wrap: anywhere;
 }
 
 .ai-message {
@@ -81,7 +82,6 @@ body {
 
 .system-message {
   background-color: limegreen;
-  word-wrap: anywhere;
 }
 
 /* Chat Form */
