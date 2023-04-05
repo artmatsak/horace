@@ -9,7 +9,7 @@ Features:
 * WebSocket chatbot server
 * Docker-friendly
 * Sample web and CLI clients provided
-* Pluggable LLM backends (currently OpenAI API with GPT-3.5/ChatGPT/GPT-4)
+* Pluggable LLM backends (currently OpenAI API with ChatGPT or GPT-4)
 * Out-of-the-box support for ChatGPT plugins
 * ChatGPT plugin auth methods supported: `none`, `user_http`, `service_http`
 * Request validation for the plugins according to their OpenAPI specifications
@@ -98,11 +98,10 @@ Refer to the OpenAI API backend (`backends/openai_backend.py`) as an example.
 
 The OpenAI API backend lets you switch between the following models:
 
-* ChatGPT (default): The cheapest model, works reasonably well.
-* GPT-3.5 (`text-davinci-003`): 10x more expensive than ChatGPT but could work a bit better.
-* GPT-4: The most expensive but also the most powerful of them all.
+* ChatGPT (default): A cheap-to-access model that works reasonably well.
+* GPT-4: Much more expensive than ChatGPT but should be more bullet-proof.
 
-See `config.yaml` for switching between the various OpenAI API models.
+See `config.yaml` for switching between the OpenAI API models.
 
 ## Using ChatGPT Plugins
 
