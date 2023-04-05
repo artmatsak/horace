@@ -15,7 +15,12 @@ BACKENDS = {
 }
 
 
-def get_handler(config: Dict[str, Any], router: Router, debug_mode: bool = False):
+def get_handler(
+    backend_config: Dict[str, Any],
+    horace_config: Dict[str, Any],
+    router: Router,
+    debug_mode: bool = False
+):
     async def handler(websocket):
         async def send_state(state: str):
             await websocket.send(json.dumps({"type": "state", "state": state}))
@@ -25,13 +30,12 @@ def get_handler(config: Dict[str, Any], router: Router, debug_mode: bool = False
             await websocket.send(json.dumps({"type": "utterance", "source": source, "text": utterance}))
 
         chatbot = HoraceChatbot(
-            backend=BACKENDS[config["backend"]["name"]](
-                **config["backend"]["params"]),
+            backend=BACKENDS[backend_config["name"]](**backend_config["params"]),
             router=router,
             utterance_coroutine=send_utterance,
             state_coroutine=send_state,
-            extra_instructions=config.get("extra_instructions"),
-            debug_mode=debug_mode
+            debug_mode=debug_mode,
+            **horace_config
         )
 
         async for message in websocket:
@@ -71,7 +75,15 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     config = parse_config("config.yaml")
-    router = Router(plugins=config.get("plugins"))
-    handler = get_handler(config, router, args.debug)
+
+    router_config = config.get("router") or {}
+    router = Router(**router_config)
+
+    handler = get_handler(
+        backend_config=config.get("backend") or {},
+        horace_config=config.get("horace") or {},
+        router=router,
+        debug_mode=args.debug
+    )
 
     asyncio.run(main(handler, args.host, args.port))
