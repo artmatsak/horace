@@ -81,6 +81,7 @@ body {
 
 .system-message {
   background-color: limegreen;
+  word-wrap: anywhere;
 }
 
 /* Chat Form */
