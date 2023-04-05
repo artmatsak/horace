@@ -125,7 +125,7 @@ Horace currently supports the `none`, `user_http` and `server_http` auth methods
 
 ## Providing Extra Prompt Instructions
 
-The default LLM prompt for Horace is designed to make the bot neutral. The bot is neither limited to plugin-facilitated user requests (like a restaurant booking bot would be, for example), nor does is proactively push the plugin-enabled functionality onto the user. In other words, you can chat to the bot like you normally would with ChatGPT; if the bot feels that invoking a plugin method is needed, it will do so.
+The default LLM prompt for Horace is designed to make the bot neutral. The bot is neither limited to plugin-facilitated user requests (like a restaurant booking bot would be, for example), nor does it proactively push the plugin-enabled functionality onto the user. In other words, you can chat with the bot like you normally would with ChatGPT; if the bot feels that invoking a plugin method is needed, it will do so.
 
 In real-world scenarios, you may want to limit the bot to a particular scope like booking a table (see [GRACE's prompt](https://github.com/artmatsak/grace/blob/master/grace_chatbot.py#L11) for inspiration), or perhaps provide it with a unique voice/personality. To do this, you can add instructions to the LLM prompt using the `extra_instructions` property in `config.yaml`:
 
