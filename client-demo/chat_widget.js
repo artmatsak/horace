@@ -35,7 +35,7 @@ function handleMessage(data) {
       displayMessage(data.source, data.text);
       break;
     case "state":
-      handleState(data.state); // Add this line
+      handleState(data.state);
       break;
     case "error":
       displayError(data.message);
@@ -45,7 +45,7 @@ function handleMessage(data) {
   }
 }
 
-function handleState(state) { // Add this function
+function handleState(state) {
   switch (state) {
     case "replying":
       chatInput.disabled = true;
