@@ -73,6 +73,7 @@ body {
   color: #333;
   align-self: flex-start;
   margin-right: 50px;
+  white-space: pre-wrap;
 }
 
 /* Chat Form */
