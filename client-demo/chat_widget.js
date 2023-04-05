@@ -89,7 +89,13 @@ function displayMessage(source, text) {
       : "system-message"
   );
   chatBubble.innerHTML = text.replace(/\n/g, "<br>"); // Replace new lines with <br> tags
-  chatMessages.appendChild(chatBubble);
+
+  if (typingBubble) {
+    chatMessages.insertBefore(chatBubble, typingBubble);
+  } else {
+    chatMessages.appendChild(chatBubble);
+  }
+
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
