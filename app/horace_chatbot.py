@@ -21,6 +21,7 @@ To call an API method, use the following format: {call_opening_tag}[JSON]{call_c
 
 Here is an example with made-up values:
 
+{names[1]}: OK, now add that item to my list.
 {names[0]}: Sure, let me look into that. {call_opening_tag}{{"plugin_system_name": "test", "request_object_params": {{"method": "POST", "url": "https://www.example.com/api/"}}}}{call_closing_tag}
 {names[2]}: API responded with HTTP status code 200, response body: OK
 {names[0]}: All done!
