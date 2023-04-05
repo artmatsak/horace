@@ -50,17 +50,14 @@ function handleMessage(data) {
 function handleState(state) {
   switch (state) {
     case "replying":
-      chatInput.disabled = true;
       chatSend.disabled = true;
       showTypingAnimation();
       break;
     case "listening":
-      chatInput.disabled = false;
       chatSend.disabled = false;
       hideTypingAnimation();
       break;
     case "ended":
-      chatInput.disabled = true;
       chatSend.disabled = true;
       socket.close();
       break;
