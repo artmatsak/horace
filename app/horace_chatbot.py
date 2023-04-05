@@ -17,7 +17,7 @@ You can use the APIs above if you determine that you need the functionality they
 To call an API method, use the following format: {call_opening_tag}[JSON]{call_closing_tag}, where [JSON] is a JSON object with the following properties:
 
 - plugin_system_name: The system name for the plugin as defined above
-- request_object_params: A dictionary of parameters for instantiation of the corresponding requests.Request object in Python.
+- request_object_params: A dictionary of parameters for instantiation of the corresponding requests.Request(method, url, data, json, params) object in Python.
 
 Here is an example with made-up values:
 
