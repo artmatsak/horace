@@ -26,7 +26,7 @@ Horace builds upon and extends [GRACE](https://github.com/artmatsak/grace), my o
 5. Activate the virtual environment: `source ./venv/bin/activate`
 6. Install project requirements: `pip3 install -r requirements.txt`
 7. Navigate to the `app` directory: `cd app`
-8. Start the server: `OPENAI_API_KEY=openai-api-key python3 main.py` (replace `openai-api-key` with your OpenAI API key - get it [here](https://beta.openai.com/signup))
+8. Start the server: `OPENAI_API_KEY=openai-api-key python3 main.py` (replace `openai-api-key` with your OpenAI API key - get it [here](https://platform.openai.com/signup))
 9. Launch a client:
   * For the CLI client, run this in another terminal window:
 ```
