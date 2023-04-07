@@ -15,7 +15,8 @@ class Chatbot():
         utterance_coroutine: Callable[[str], Coroutine],
         state_coroutine: Optional[Callable[[str], Coroutine]] = None,
         names: Tuple[str, str] = ("AI", "Human"),
-        end_token: Optional[str] = None
+        end_token: Optional[str] = None,
+        temperature: Optional[float] = 0.9
     ):
         self.backend = backend
         self.prompt = initial_prompt
@@ -23,6 +24,7 @@ class Chatbot():
         self.state_coroutine = state_coroutine
         self.names = names
         self.end_token = end_token
+        self.temperature = temperature
 
         self.stop = [f"{name}:" for name in names]
         self._state = self.STATE_LISTENING
@@ -57,18 +59,19 @@ class Chatbot():
         self.prompt += f"\n{name}: {response}"
 
     async def _get_all_utterances(self):
-        utterance = await self._get_next_utterance()
+        utterance = await self._get_next_utterance(self.temperature)
 
         if utterance:
             await self.utterance_coroutine(utterance)
 
         self._add_response(self.names[0], utterance)
 
-    async def _get_next_utterance(self) -> str:
+    async def _get_next_utterance(self, temperature: float) -> str:
         utterance = await self.backend.complete(
             self.prompt + f"\n{self.names[0]}:",
             max_tokens=750,
-            stop=self.stop
+            stop=self.stop,
+            temperature=temperature
         )
         utterance = utterance.strip()
         logging.debug(f"Got utterance: {repr(utterance)}")

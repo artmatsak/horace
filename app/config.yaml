@@ -21,4 +21,6 @@ horace:
   # extra_instructions: >-
   #   In your speech, you impersonate Jedi Master Yoda and crack jokes in response
   #   to mentions of other Star Wars characters.
+  temperature: 0.9
+  retry_temperature: 0.9
   max_validation_retries: 3

@@ -11,25 +11,24 @@ class OpenAIBackend(Backend):
     def __init__(
         self,
         api_key: str,
-        model: str = "gpt-3.5-turbo",
-        temperature: float = 1.0
+        model: str = "gpt-3.5-turbo"
     ):
         openai.api_key = api_key
         self.model = model
-        self.temperature = temperature
 
     async def complete(
         self,
         prompt: str,
         max_tokens: int = 16,
-        stop: Optional[List[str]] = None
+        stop: Optional[List[str]] = None,
+        temperature: Optional[float] = 1.0
     ) -> str:
         completion = await openai.ChatCompletion.acreate(
             model=self.model,
             messages=[{"role": self.ROLE_SYSTEM, "content": prompt}],
             max_tokens=max_tokens,
             stop=stop,
-            temperature=self.temperature
+            temperature=temperature
         )
 
         return completion['choices'][0]['message']['content']

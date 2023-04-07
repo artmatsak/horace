@@ -42,6 +42,8 @@ You do not disclose any implementation details to the user, including the API me
         utterance_coroutine: Callable[[str, Optional[bool]], Coroutine],
         state_coroutine: Optional[Callable[[str], Coroutine]] = None,
         extra_instructions: Optional[str] = None,
+        temperature: Optional[float] = 0.9,
+        retry_temperature: Optional[float] = 0.9,
         max_validation_retries: int = 1,
         debug_mode: bool = False
     ):
@@ -70,10 +72,12 @@ plugin_system_name: {name}
             initial_prompt="\n\n".join(prompt_blocks) + "\n",
             utterance_coroutine=utterance_coroutine,
             state_coroutine=state_coroutine,
-            names=self.NAMES
+            names=self.NAMES,
+            temperature=temperature
         )
 
         self.router = router
+        self.retry_temperature = retry_temperature
         self.max_validation_retries = max_validation_retries
         self.debug_mode = debug_mode
         self.stop.append(self.CALL_CLOSING_TAG)
@@ -81,8 +85,9 @@ plugin_system_name: {name}
     async def _get_all_utterances(self):
         prepared_request = None
 
-        for _ in range(self.max_validation_retries):
-            utterance = await self._get_next_utterance()
+        for attempt_count in range(self.max_validation_retries):
+            temperature = self.retry_temperature if attempt_count > 0 else self.temperature
+            utterance = await self._get_next_utterance(temperature)
 
             m = re.match(
                 r"(.*?)($|" + re.escape(self.CALL_OPENING_TAG) + r"(.*))", utterance, re.DOTALL)
@@ -133,7 +138,8 @@ plugin_system_name: {name}
         if call_json:
             if prepared_request:
                 status_code, text = self.router.send(prepared_request)
-                logging.debug(f"Got router response: {repr((status_code, text))}")
+                logging.debug(
+                    f"Got router response: {repr((status_code, text))}")
 
                 result = f"API responded with HTTP status code {status_code}"
                 if status_code >= 200 and status_code < 300:

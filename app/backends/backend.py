@@ -8,6 +8,7 @@ class Backend():
         self,
         prompt: str,
         max_tokens: int = 16,
-        stop: Optional[List[str]] = None
+        stop: Optional[List[str]] = None,
+        temperature: Optional[float] = 1.0
     ) -> str:
         pass
