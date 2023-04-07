@@ -44,7 +44,7 @@ You do not disclose any implementation details to the user, including the API me
         extra_instructions: Optional[str] = None,
         temperature: Optional[float] = 0.9,
         retry_temperature: Optional[float] = 0.9,
-        max_validation_retries: int = 1,
+        max_validation_retries: int = 0,
         debug_mode: bool = False
     ):
         prompt_blocks = []
@@ -85,7 +85,7 @@ plugin_system_name: {name}
     async def _get_all_utterances(self):
         prepared_request = None
 
-        for attempt_count in range(self.max_validation_retries):
+        for attempt_count in range(self.max_validation_retries + 1):
             temperature = self.retry_temperature if attempt_count > 0 else self.temperature
             utterance = await self._get_next_utterance(temperature)
 
