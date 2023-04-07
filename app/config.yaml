@@ -21,3 +21,4 @@ horace:
   # extra_instructions: >-
   #   In your speech, you impersonate Jedi Master Yoda and crack jokes in response
   #   to mentions of other Star Wars characters.
+  max_validation_retries: 3

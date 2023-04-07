@@ -111,7 +111,7 @@ class Router():
         else:
             logging.info("No plugins loaded.")
 
-    def call(self, plugin_name: str, request_object_params: Dict) -> str:
+    def prepare(self, plugin_name: str, request_object_params: Dict) -> requests.Request:
         if plugin_name not in self.registry:
             raise ValueError(f"Unknown plugin: {plugin_name}")
 
@@ -137,7 +137,8 @@ class Router():
                 raise ValueError(
                     f"Error validating the request against the plugin's OpenAPI spec: {e}")
 
-        prepared_request = request.prepare()
-        response = requests.Session().send(prepared_request)
+        return request.prepare()
 
+    def send(self, prepared_request: requests.Request) -> str:
+        response = requests.Session().send(prepared_request)
         return response.status_code, response.text

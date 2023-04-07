@@ -42,6 +42,7 @@ You do not disclose any implementation details to the user, including the API me
         utterance_coroutine: Callable[[str, Optional[bool]], Coroutine],
         state_coroutine: Optional[Callable[[str], Coroutine]] = None,
         extra_instructions: Optional[str] = None,
+        max_validation_retries: int = 1,
         debug_mode: bool = False
     ):
         prompt_blocks = []
@@ -73,58 +74,73 @@ plugin_system_name: {name}
         )
 
         self.router = router
+        self.max_validation_retries = max_validation_retries
         self.debug_mode = debug_mode
         self.stop.append(self.CALL_CLOSING_TAG)
 
     async def _get_all_utterances(self):
-        utterance = await self._get_next_utterance()
+        prepared_request = None
 
-        m = re.match(
-            r"(.*?)($|" + re.escape(self.CALL_OPENING_TAG) + r"(.*))", utterance, re.DOTALL)
-        stripped_utterance = m[1].strip()
-        call_json = m[3]
+        for _ in range(self.max_validation_retries):
+            utterance = await self._get_next_utterance()
+
+            m = re.match(
+                r"(.*?)($|" + re.escape(self.CALL_OPENING_TAG) + r"(.*))", utterance, re.DOTALL)
+            stripped_utterance = m[1].strip()
+            call_json = m[3]
+
+            if self.debug_mode:
+                await self.utterance_coroutine(utterance)
+
+            if call_json:
+                logging.debug(f"Processing API call: {repr(call_json)}")
+
+                try:
+                    try:
+                        call_dict, ind = json.JSONDecoder().raw_decode(call_json)
+                    except json.decoder.JSONDecodeError:
+                        raise ValueError(f"Malformed JSON: {repr(call_json)}")
+
+                    truncate_len = len(call_json) - ind
+                    if truncate_len:
+                        # Truncate the utterance so that it correctly ends with
+                        # the JSON
+                        utterance = utterance[:-truncate_len]
+
+                    prepared_request = self.router.prepare(
+                        call_dict["plugin_system_name"], call_dict["request_object_params"])
+                except Exception as e:
+                    result = str(e)
+                    logging.error(e)
+
+                    if self.debug_mode:
+                        await self.utterance_coroutine(result, is_system=True)
+                finally:
+                    # Add back the closing call tag to the utterance - it's not
+                    # generated due to self.stop
+                    utterance += self.CALL_CLOSING_TAG
+
+                if prepared_request:
+                    break
+            else:
+                break
 
         if stripped_utterance and not self.debug_mode:
             await self.utterance_coroutine(stripped_utterance)
-        elif self.debug_mode:
-            await self.utterance_coroutine(utterance)
 
-        self.prompt = f"{self.prompt} {utterance}"
+        self._add_response(self.names[0], utterance)
 
         if call_json:
-            logging.debug(f"Processing API call: {repr(call_json)}")
-
-            try:
-                try:
-                    call_dict, ind = json.JSONDecoder().raw_decode(call_json)
-                except json.decoder.JSONDecodeError:
-                    raise ValueError(f"Malformed JSON: {repr(call_json)}")
-
-                truncate_len = len(call_json) - ind
-                if truncate_len:
-                    # Truncate the prompt so that the AI's utterance correctly
-                    # ends with the JSON
-                    self.prompt = self.prompt[:-truncate_len]
-
-                status_code, text = self.router.call(
-                    call_dict["plugin_system_name"], call_dict["request_object_params"])
-
-                logging.debug(
-                    f"Got router response: {repr((status_code, text))}")
+            if prepared_request:
+                status_code, text = self.router.send(prepared_request)
+                logging.debug(f"Got router response: {repr((status_code, text))}")
 
                 result = f"API responded with HTTP status code {status_code}"
                 if status_code >= 200 and status_code < 300:
                     result += f", response body: {text}"
-            except Exception as e:
-                result = str(e)
-                logging.error(e)
-            finally:
-                # Add back the closing tag to the prompt - it's not generated
-                # due to self.stop
-                self.prompt += self.CALL_CLOSING_TAG
 
-            if self.debug_mode:
-                await self.utterance_coroutine(result, is_system=True)
+                if self.debug_mode:
+                    await self.utterance_coroutine(result, is_system=True)
 
             self._add_response(self.names[2], result)
             await self._get_all_utterances()

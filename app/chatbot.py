@@ -62,13 +62,11 @@ class Chatbot():
         if utterance:
             await self.utterance_coroutine(utterance)
 
-        self.prompt = f"{self.prompt} {utterance}"
+        self._add_response(self.names[0], utterance)
 
     async def _get_next_utterance(self) -> str:
-        self.prompt += f"\n{self.names[0]}:"
-
         utterance = await self.backend.complete(
-            self.prompt,
+            self.prompt + f"\n{self.names[0]}:",
             max_tokens=750,
             stop=self.stop
         )
