@@ -11,7 +11,7 @@ class OpenAIBackend(Backend):
     def __init__(
         self,
         api_key: str,
-        model: str = "text-davinci-003",
+        model: str = "gpt-3.5-turbo",
         temperature: float = 1.0
     ):
         openai.api_key = api_key
