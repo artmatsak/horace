@@ -6,7 +6,6 @@ backend:
     model: gpt-3.5-turbo
     # GPT-4
     # model: gpt-4
-    temperature: 0.9
 
 router:
   plugins:
