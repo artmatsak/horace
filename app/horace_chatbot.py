@@ -83,7 +83,7 @@ plugin_system_name: {name}
         self.stop.append(self.CALL_CLOSING_TAG)
 
     async def _get_all_utterances(self):
-        prepared_request = None
+        prepared_request_params = None
 
         for attempt_count in range(self.max_validation_retries + 1):
             temperature = self.retry_temperature if attempt_count > 0 else self.temperature
@@ -112,7 +112,7 @@ plugin_system_name: {name}
                         # the JSON
                         utterance = utterance[:-truncate_len]
 
-                    prepared_request = self.router.prepare(
+                    prepared_request_params = self.router.prepare(
                         call_dict["plugin_system_name"], call_dict["request_object_params"])
                 except Exception as e:
                     result = str(e)
@@ -125,7 +125,7 @@ plugin_system_name: {name}
                     # generated due to self.stop
                     utterance += self.CALL_CLOSING_TAG
 
-                if prepared_request:
+                if prepared_request_params:
                     break
             else:
                 break
@@ -136,8 +136,8 @@ plugin_system_name: {name}
         self._add_response(self.names[0], utterance)
 
         if call_json:
-            if prepared_request:
-                status_code, text = self.router.send(prepared_request)
+            if prepared_request_params:
+                status_code, text = await self.router.send(prepared_request_params)
                 logging.debug(
                     f"Got router response: {repr((status_code, text))}")
 

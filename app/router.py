@@ -1,6 +1,7 @@
 import os
 import yaml
 import json
+import aiohttp
 import requests
 from urllib.parse import urlunsplit
 import openapi_core
@@ -111,7 +112,7 @@ class Router():
         else:
             logging.info("No plugins loaded.")
 
-    def prepare(self, plugin_name: str, request_object_params: Dict) -> requests.Request:
+    def prepare(self, plugin_name: str, request_params: Dict) -> Dict:
         if plugin_name not in self.registry:
             raise ValueError(f"Unknown plugin: {plugin_name}")
 
@@ -120,12 +121,12 @@ class Router():
             extra_headers = {
                 'Authorization': f'Bearer {self.registry[plugin_name]["auth"]["token"]}'
             }
-            if "headers" in request_object_params:
-                request_object_params["headers"].update(extra_headers)
+            if "headers" in request_params:
+                request_params["headers"].update(extra_headers)
             else:
-                request_object_params["headers"] = extra_headers
+                request_params["headers"] = extra_headers
 
-        request = requests.Request(**request_object_params)
+        request = requests.Request(**request_params)
 
         # Validate the request against the plugin's OpenAPI spec
         if "spec" in self.registry[plugin_name]:
@@ -137,8 +138,13 @@ class Router():
                 raise ValueError(
                     f"Error validating the request against the plugin's OpenAPI spec: {e}")
 
-        return request.prepare()
+        # Prepare aiohttp request params
+        return {key: request_params.get(key)
+                for key in ['method', 'url', 'headers', 'params', 'data', 'json']}
 
-    def send(self, prepared_request: requests.Request) -> str:
-        response = requests.Session().send(prepared_request)
-        return response.status_code, response.text
+    async def send(self, prepared_request_params: Dict) -> str:
+        async with aiohttp.ClientSession() as session:
+            async with session.request(**prepared_request_params) as response:
+                text = await response.text()
+
+        return response.status, text
